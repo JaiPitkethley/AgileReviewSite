@@ -1,78 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <style>
-    body {
-      background:#0B0B12;
-      color:#EEEEF5;
-      font-family:'Inter', sans-serif;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-    }
-
-    .card {
-      background:#18181F;
-      padding:35px;
-      border-radius:12px;
-      width:320px;
-      text-align:center;
-      border:1px solid #2A2A38;
-    }
-
-    h2 {
-      margin-bottom:20px;
-    }
-
-    input {
-      width:100%;
-      padding:12px;
-      margin:10px 0;
-      background:#111118;
-      border:1px solid #2A2A38;
-      color:white;
-      border-radius:8px;
-    }
-
-    button {
-      width:100%;
-      padding:12px;
-      background:#7F77DD;
-      border:none;
-      color:white;
-      border-radius:8px;
-      cursor:pointer;
-      margin-top:10px;
-    }
-
-    button:hover {
-      background:#AFA9EC;
-    }
-
-    a {
-      color:#7F77DD;
-      font-size:13px;
-      text-decoration:none;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - BingeTracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
+<body class="auth-page">
 
-<body>
+  <header class="auth-header">
+    <a href="landing.html" class="brand-block">
+  <span class="brand-main">SERIES TRACKER</span>
+</a>
+  </header>
 
-<div class="card">
-  <h2>Login</h2>
+  <main class="auth-main">
+    <section class="auth-card">
+      <h1>Sign In</h1>
+      <p class="auth-text">Enter your account details to continue.</p>
 
-  <input type="text" placeholder="Username">
-  <input type="password" placeholder="Password">
+      <form class="auth-form" action="reviewsitehome.html">
+        <input type="email" placeholder="Email address" required>
+        <input type="password" placeholder="Password" required>
+        <button type="submit">Sign In</button>
+      </form>
 
-  <button>Login</button>
-
-  <p style="margin-top:15px;">
-    <a href="signup.html">Create account</a>
-  </p>
-</div>
+      <div class="auth-links">
+        <p>New to BingeTracker? <a href="signup.html">Create an account</a></p>
+        <p><a href="landing.html">← Back to home</a></p>
+      </div>
+    </section>
+  </main>
 
 </body>
 </html>
