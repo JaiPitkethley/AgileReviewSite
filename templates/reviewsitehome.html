@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>name of site</title>
+  <title>Series Tracker Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* ── Reset & Root ── */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -16,14 +15,12 @@
     }
 
     :root {
-      /* Backgrounds */
       --bg:       #0B0B12;
       --bg2:      #111118;
       --bg3:      #18181F;
       --bg4:      #21212A;
       --sidebar:  #0D0D15;
 
-      /* Purple palette */
       --p50:  #EEEDFE;
       --p100: #CECBF6;
       --p200: #AFA9EC;
@@ -32,30 +29,24 @@
       --p800: #3C3489;
       --p900: #26215C;
 
-      /* Accent shorthands */
       --accent:    #7F77DD;
       --accent-hi: #AFA9EC;
       --accent-lo: #3C3489;
 
-      /* Text */
       --text:  #EEEEF5;
       --text2: #8888A8;
       --text3: #44445A;
 
-      /* Borders */
       --border:  #1E1E28;
       --border2: #2A2A38;
 
-      /* Semantic */
       --green:  #52C481;
       --yellow: #D4A84B;
       --red:    #D46060;
 
-      /* Typography */
       --sans:  'Inter', sans-serif;
       --serif: 'Playfair Display', serif;
 
-      /* Layout */
       --sidebar-w: 220px;
       --radius-sm: 6px;
       --radius-md: 8px;
@@ -76,15 +67,16 @@
       min-height: 100vh;
     }
 
-    /* ── App Shell ── */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
     .shell {
       display: flex;
       min-height: 100vh;
     }
 
-    /* ════════════════════════
-       SIDEBAR
-    ════════════════════════ */
     .sidebar {
       width: var(--sidebar-w);
       flex-shrink: 0;
@@ -98,17 +90,18 @@
       overflow-y: auto;
     }
 
-    /* Logo */
     .sb-logo {
       padding: 24px 20px 20px;
       border-bottom: 1px solid var(--border);
     }
+
     .sb-logo-text {
       font-family: var(--serif);
       font-size: 20px;
       color: var(--accent-hi);
       letter-spacing: 0.3px;
     }
+
     .sb-logo-sub {
       font-size: 11px;
       color: var(--text3);
@@ -117,7 +110,6 @@
       text-transform: uppercase;
     }
 
-    /* Section labels */
     .sb-section {
       padding: 16px 12px 8px;
       font-size: 10px;
@@ -126,10 +118,10 @@
       text-transform: uppercase;
     }
 
-    /* Nav items */
     .sb-nav {
       padding: 0 10px;
     }
+
     .sb-item {
       display: flex;
       align-items: center;
@@ -145,17 +137,18 @@
       text-decoration: none;
       user-select: none;
     }
+
     .sb-item:hover {
       background: var(--bg3);
       color: var(--text);
     }
+
     .sb-item.active {
       background: var(--p900);
       border-color: var(--p800);
       color: var(--p200);
     }
 
-    /* Nav icons (using simple Unicode — swap for an icon library as needed) */
     .sb-icon {
       width: 16px;
       height: 16px;
@@ -166,11 +159,11 @@
       justify-content: center;
       opacity: 0.7;
     }
+
     .sb-item.active .sb-icon {
       opacity: 1;
     }
 
-    /* Badge */
     .sb-badge {
       margin-left: auto;
       background: var(--p600);
@@ -181,18 +174,17 @@
       font-weight: 500;
     }
 
-    /* Divider */
     .sb-divider {
       height: 1px;
       background: var(--border);
       margin: 12px 10px;
     }
 
-    /* User profile block at bottom */
     .sb-bottom {
       margin-top: auto;
       padding: 16px 10px;
     }
+
     .sb-user {
       display: flex;
       align-items: center;
@@ -201,12 +193,13 @@
       border-radius: var(--radius-md);
       background: var(--bg3);
       border: 1px solid var(--border);
-      cursor: pointer;
       transition: border-color 0.15s;
     }
+
     .sb-user:hover {
       border-color: var(--border2);
     }
+
     .sb-avatar {
       width: 30px;
       height: 30px;
@@ -219,29 +212,30 @@
       font-weight: 500;
       color: var(--p100);
       flex-shrink: 0;
+      text-transform: uppercase;
     }
+
     .sb-user-name {
       font-size: 12px;
       font-weight: 500;
     }
+
     .sb-user-sub {
       font-size: 10px;
       color: var(--text3);
     }
+
     .sb-cog {
       margin-left: auto;
       color: var(--text3);
       font-size: 14px;
-      cursor: pointer;
       transition: color 0.15s;
     }
+
     .sb-cog:hover {
       color: var(--text2);
     }
 
-    /* ════════════════════════
-       MAIN CONTENT AREA
-    ════════════════════════ */
     .main {
       flex: 1;
       min-width: 0;
@@ -249,7 +243,6 @@
       flex-direction: column;
     }
 
-    /* ── Top Bar ── */
     .topbar {
       display: flex;
       align-items: center;
@@ -261,6 +254,7 @@
       top: 0;
       z-index: 10;
     }
+
     .topbar-search {
       display: flex;
       align-items: center;
@@ -273,9 +267,11 @@
       max-width: 400px;
       transition: border-color 0.15s;
     }
+
     .topbar-search:focus-within {
       border-color: var(--p600);
     }
+
     .topbar-search input {
       background: none;
       border: none;
@@ -285,20 +281,24 @@
       outline: none;
       flex: 1;
     }
+
     .topbar-search input::placeholder {
       color: var(--text3);
     }
+
     .topbar-search-icon {
       color: var(--text3);
       font-size: 13px;
       flex-shrink: 0;
     }
+
     .topbar-right {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-left: auto;
     }
+
     .theme-toggle {
       display: flex;
       align-items: center;
@@ -313,10 +313,12 @@
       font-family: var(--sans);
       transition: border-color 0.15s, color 0.15s;
     }
+
     .theme-toggle:hover {
       border-color: var(--border2);
       color: var(--text);
     }
+
     .notif-btn {
       width: 32px;
       height: 32px;
@@ -332,10 +334,12 @@
       position: relative;
       transition: border-color 0.15s, color 0.15s;
     }
+
     .notif-btn:hover {
       color: var(--text);
       border-color: var(--border2);
     }
+
     .notif-dot {
       width: 6px;
       height: 6px;
@@ -346,13 +350,31 @@
       right: 5px;
     }
 
-    /* ── Page Content ── */
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-size: 12px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--p600);
+      color: var(--p200);
+      background: var(--bg3);
+    }
+
     .content {
       padding: 28px;
       flex: 1;
     }
 
-    /* ── Hero Banner ── */
     .hero-banner {
       background: var(--bg3);
       border: 1px solid var(--border2);
@@ -365,7 +387,7 @@
       overflow: hidden;
       position: relative;
     }
-    /* Left purple accent bar */
+
     .hero-accent-bar {
       position: absolute;
       left: 0;
@@ -375,6 +397,7 @@
       background: var(--accent);
       border-radius: var(--radius-xl) 0 0 var(--radius-xl);
     }
+
     .hero-text h2 {
       font-family: var(--serif);
       font-size: 28px;
@@ -382,17 +405,20 @@
       margin-bottom: 6px;
       color: var(--text);
     }
+
     .hero-text p {
       font-size: 13px;
       color: var(--text2);
       line-height: 1.6;
       max-width: 340px;
     }
+
     .hero-actions {
       display: flex;
       gap: 8px;
       margin-top: 16px;
     }
+
     .btn-primary {
       padding: 8px 20px;
       border-radius: var(--radius-md);
@@ -405,10 +431,12 @@
       font-weight: 500;
       transition: background 0.15s, border-color 0.15s;
     }
+
     .btn-primary:hover {
       background: var(--p400);
       border-color: var(--p200);
     }
+
     .btn-ghost {
       padding: 8px 16px;
       border-radius: var(--radius-md);
@@ -420,25 +448,30 @@
       cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
+
     .btn-ghost:hover {
       border-color: var(--text3);
       color: var(--text);
     }
+
     .hero-stat-row {
       display: flex;
       gap: 24px;
       margin-left: auto;
       flex-shrink: 0;
     }
+
     .hero-stat {
       text-align: center;
     }
+
     .hero-stat-n {
       font-family: var(--serif);
       font-size: 32px;
       color: var(--accent-hi);
       line-height: 1.1;
     }
+
     .hero-stat-l {
       font-size: 11px;
       color: var(--text3);
@@ -446,7 +479,6 @@
       margin-top: 2px;
     }
 
-    /* ── Genre Filter Chips ── */
     .filter-row {
       display: flex;
       align-items: center;
@@ -454,6 +486,7 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
+
     .filter-label {
       font-size: 11px;
       color: var(--text3);
@@ -461,6 +494,7 @@
       text-transform: uppercase;
       margin-right: 4px;
     }
+
     .chip {
       padding: 5px 14px;
       border-radius: 20px;
@@ -472,23 +506,25 @@
       transition: background 0.15s, border-color 0.15s, color 0.15s;
       user-select: none;
     }
+
     .chip:hover {
       border-color: var(--text3);
       color: var(--text);
     }
+
     .chip.active {
       background: var(--p900);
       border-color: var(--p600);
       color: var(--p200);
     }
 
-    /* ── Section Headers ── */
     .section-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       margin-bottom: 14px;
     }
+
     .section-title {
       font-size: 11px;
       font-weight: 500;
@@ -496,17 +532,18 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
     }
+
     .see-all {
       font-size: 12px;
       color: var(--accent);
       cursor: pointer;
       transition: color 0.15s;
     }
+
     .see-all:hover {
       color: var(--accent-hi);
     }
 
-    /* ── Two-Column Layout ── */
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -514,12 +551,12 @@
       margin-bottom: 32px;
     }
 
-    /* ── Continue / New This Week List ── */
     .continue-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     .continue-item {
       background: var(--bg3);
       border: 1px solid var(--border);
@@ -531,9 +568,11 @@
       cursor: pointer;
       transition: border-color 0.15s;
     }
+
     .continue-item:hover {
       border-color: var(--p600);
     }
+
     .ci-poster {
       width: 40px;
       height: 54px;
@@ -546,10 +585,12 @@
       font-size: 18px;
       color: rgba(255,255,255,0.5);
     }
+
     .ci-body {
       flex: 1;
       min-width: 0;
     }
+
     .ci-title {
       font-size: 13px;
       font-weight: 500;
@@ -558,36 +599,43 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .ci-sub {
       font-size: 11px;
       color: var(--text2);
       margin-bottom: 6px;
     }
+
     .ci-bar {
       display: flex;
       align-items: center;
       gap: 8px;
     }
+
     .ci-track {
       flex: 1;
       height: 3px;
       background: var(--bg4);
       border-radius: 2px;
     }
+
     .ci-fill {
       height: 100%;
       border-radius: 2px;
       background: var(--accent);
     }
+
     .ci-pct {
       font-size: 11px;
       color: var(--accent-hi);
       font-weight: 500;
     }
+
     .ci-ep {
       font-size: 11px;
       color: var(--text3);
     }
+
     .play-btn {
       width: 28px;
       height: 28px;
@@ -603,11 +651,11 @@
       cursor: pointer;
       transition: background 0.15s;
     }
+
     .play-btn:hover {
       background: var(--p600);
     }
 
-    /* ── Badges (inline) ── */
     .badge {
       padding: 2px 8px;
       border-radius: 4px;
@@ -616,28 +664,31 @@
       flex-shrink: 0;
       white-space: nowrap;
     }
+
     .badge-watching {
       background: rgba(127,119,221,0.25);
       color: #AFA9EC;
       border: 1px solid rgba(127,119,221,0.3);
     }
+
     .badge-finished {
       background: rgba(82,196,129,0.2);
       color: #52C481;
       border: 1px solid rgba(82,196,129,0.3);
     }
+
     .badge-new {
       background: rgba(212,168,75,0.2);
       color: #D4A84B;
       border: 1px solid rgba(212,168,75,0.3);
     }
 
-    /* ── Series Card Grid ── */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
       gap: 14px;
     }
+
     .card {
       background: var(--bg3);
       border: 1px solid var(--border);
@@ -646,10 +697,12 @@
       cursor: pointer;
       transition: border-color 0.15s, transform 0.15s;
     }
+
     .card:hover {
       border-color: var(--p600);
       transform: translateY(-2px);
     }
+
     .poster {
       height: 180px;
       display: flex;
@@ -661,7 +714,6 @@
       position: relative;
     }
 
-    /* Poster colour themes — replace with actual <img> tags in production */
     .p1 { background: #13102A; }
     .p2 { background: #101328; }
     .p3 { background: #1A1028; }
@@ -674,17 +726,21 @@
       top: 7px;
       right: 7px;
     }
+
     .progress-bar {
       height: 2px;
       background: var(--bg4);
     }
+
     .progress-fill {
       height: 100%;
       background: var(--accent);
     }
+
     .card-body {
       padding: 10px 11px;
     }
+
     .card-title {
       font-size: 13px;
       font-weight: 500;
@@ -693,32 +749,44 @@
       text-overflow: ellipsis;
       margin-bottom: 2px;
     }
+
     .card-sub {
       font-size: 11px;
       color: var(--text2);
     }
+
     .stars {
       color: var(--yellow);
       font-size: 10px;
       margin-top: 3px;
     }
 
-    /* ── Utility ── */
     .mt-4  { margin-top: 4px; }
-    .mt-28 { margin-top: 28px; }
+
+    @media (max-width: 1100px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-stat-row {
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="shell">
 
-  <!-- ════════════════════════
-       SIDEBAR
-  ════════════════════════ -->
   <aside class="sidebar">
 
     <div class="sb-logo">
-      <div class="sb-logo-text">NAME</div>
+      <div class="sb-logo-text">{{ user["username"] }}</div>
       <div class="sb-logo-sub">Series Tracker</div>
     </div>
 
@@ -771,14 +839,18 @@
         <span class="sb-icon">&#9723;</span>
         Settings
       </a>
+      <a class="sb-item" href="{{ url_for('logout') }}">
+        <span class="sb-icon">&#8617;</span>
+        Logout
+      </a>
     </nav>
 
     <div class="sb-bottom">
       <div class="sb-user">
-        <div class="sb-avatar">JL</div>
+        <div class="sb-avatar">{{ user["username"][:2] | upper }}</div>
         <div>
-          <div class="sb-user-name">Jamie Lee</div>
-          <div class="sb-user-sub">Pro account</div>
+          <div class="sb-user-name">{{ user["username"] }}</div>
+          <div class="sb-user-sub">{{ user["email"] }}</div>
         </div>
         <span class="sb-cog">&#9881;</span>
       </div>
@@ -786,18 +858,15 @@
 
   </aside>
 
-  <!-- ════════════════════════
-       MAIN
-  ════════════════════════ -->
   <div class="main">
 
-    <!-- Top Bar -->
     <header class="topbar">
       <div class="topbar-search">
         <span class="topbar-search-icon">&#9906;</span>
         <input type="text" placeholder="Search series, director, cast...">
       </div>
       <div class="topbar-right">
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
         <button class="theme-toggle">&#9790; Dark</button>
         <button class="notif-btn">
           &#9825;
@@ -806,14 +875,12 @@
       </div>
     </header>
 
-    <!-- Page Content -->
     <main class="content">
 
-      <!-- Hero Banner -->
       <div class="hero-banner">
         <div class="hero-accent-bar"></div>
         <div class="hero-text">
-          <h2>Welcome back, Jamie</h2>
+          <h2>Welcome back, {{ user["username"] }}</h2>
           <p>You have 3 series in progress and 2 new episodes dropped this week on your watchlist.</p>
           <div class="hero-actions">
             <button class="btn-primary">Continue watching</button>
@@ -836,7 +903,6 @@
         </div>
       </div>
 
-      <!-- Genre Filter -->
       <div class="filter-row">
         <span class="filter-label">Genre</span>
         <div class="chip active" onclick="toggleChip(this)">All</div>
@@ -849,10 +915,8 @@
         <div class="chip" onclick="toggleChip(this)">Documentary</div>
       </div>
 
-      <!-- Two-column: Continue Watching + New This Week -->
       <div class="two-col">
 
-        <!-- Continue Watching -->
         <div>
           <div class="section-header">
             <span class="section-title">Continue watching</span>
@@ -902,7 +966,6 @@
           </div>
         </div>
 
-        <!-- New This Week -->
         <div>
           <div class="section-header">
             <span class="section-title">New this week</span>
@@ -943,9 +1006,8 @@
           </div>
         </div>
 
-      </div><!-- /.two-col -->
+      </div>
 
-      <!-- Trending Section -->
       <div class="section-header mt-4">
         <span class="section-title">Trending — Drama</span>
         <span class="see-all">View all</span>
@@ -1021,34 +1083,31 @@
           </div>
         </div>
 
-      </div><!-- /.card-grid -->
+      </div>
 
     </main>
-  </div><!-- /.main -->
+  </div>
 
-</div><!-- /.shell -->
+</div>
 
 <script>
-  /* ── Genre chip toggle ── */
   function toggleChip(el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
   }
 
-  /* ── Sidebar active state ── */
   document.querySelectorAll('.sb-item').forEach(item => {
     item.addEventListener('click', function(e) {
-      e.preventDefault();
+      if (this.getAttribute('href') === '#') {
+        e.preventDefault();
+      }
       document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
       this.classList.add('active');
     });
   });
 
-  /* ── Theme toggle placeholder ── */
   const themeBtn = document.querySelector('.theme-toggle');
   themeBtn.addEventListener('click', () => {
-    /* Wire up to your actual theme system here.
-       For a light mode, swap CSS variable values on :root */
     themeBtn.textContent = themeBtn.textContent.includes('Dark') ? '☀ Light' : '☾ Dark';
   });
 </script>

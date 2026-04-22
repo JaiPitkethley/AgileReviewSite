@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BingeTracker</title>
+  <title>Series Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="landing-page">
 
@@ -15,22 +15,38 @@
     <div class="landing-overlay"></div>
 
     <header class="landing-header">
-      <a href="landing.html" class="brand-block">
-  <span class="brand-main">SERIES TRACKER</span>
-</a>
+      <a href="{{ url_for('landing') }}" class="brand-block">
+        <span class="brand-main">SERIES TRACKER</span>
+      </a>
 
-      <a href="login.html" class="header-signin-btn">Sign In</a>
+      <a href="{{ url_for('login') }}" class="header-signin-btn">Sign In</a>
     </header>
 
     <main class="landing-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <h1 class="landing-title">Track your next binge, all in one place.</h1>
       <h2 class="landing-subtitle">Reviews, favourites, watchlists and more.</h2>
       <p class="landing-description">
         Ready to get started? Enter your email to create or restart your account.
       </p>
 
-      <form class="landing-form" action="signup.html">
-        <input type="email" placeholder="Email address" required>
+      <form class="landing-form" action="{{ url_for('signup') }}" method="get">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email address"
+          value="{{ prefill_email }}"
+          required
+        >
         <button type="submit">Get Started</button>
       </form>
     </main>
