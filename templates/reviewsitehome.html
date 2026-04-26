@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>name of site</title>
+  <title>Series Tracker Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,13 +13,10 @@
 
 <div class="shell">
 
-  <!-- ════════════════════════
-       SIDEBAR
-  ════════════════════════ -->
   <aside class="sidebar">
 
     <div class="sb-logo">
-      <div class="sb-logo-text">NAME</div>
+      <div class="sb-logo-text">{{ user["username"] }}</div>
       <div class="sb-logo-sub">Series Tracker</div>
     </div>
 
@@ -72,14 +69,18 @@
         <span class="sb-icon">&#9723;</span>
         Settings
       </a>
+      <a class="sb-item" href="{{ url_for('logout') }}">
+        <span class="sb-icon">&#8617;</span>
+        Logout
+      </a>
     </nav>
 
     <div class="sb-bottom">
       <div class="sb-user">
-        <div class="sb-avatar">JL</div>
+        <div class="sb-avatar">{{ user["username"][:2] | upper }}</div>
         <div>
-          <div class="sb-user-name">Jamie Lee</div>
-          <div class="sb-user-sub">Pro account</div>
+          <div class="sb-user-name">{{ user["username"] }}</div>
+          <div class="sb-user-sub">{{ user["email"] }}</div>
         </div>
         <span class="sb-cog">&#9881;</span>
       </div>
@@ -87,18 +88,15 @@
 
   </aside>
 
-  <!-- ════════════════════════
-       MAIN
-  ════════════════════════ -->
   <div class="main">
 
-    <!-- Top Bar -->
     <header class="topbar">
       <div class="topbar-search">
         <span class="topbar-search-icon">&#9906;</span>
         <input type="text" placeholder="Search series, director, cast...">
       </div>
       <div class="topbar-right">
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
         <button class="theme-toggle">&#9790; Dark</button>
         <button class="notif-btn">
           &#9825;
@@ -107,14 +105,12 @@
       </div>
     </header>
 
-    <!-- Page Content -->
     <main class="content">
 
-      <!-- Hero Banner -->
       <div class="hero-banner">
         <div class="hero-accent-bar"></div>
         <div class="hero-text">
-          <h2>Welcome back, Jamie</h2>
+          <h2>Welcome back, {{ user["username"] }}</h2>
           <p>You have 3 series in progress and 2 new episodes dropped this week on your watchlist.</p>
           <div class="hero-actions">
             <button class="btn-primary">Continue watching</button>
@@ -137,7 +133,6 @@
         </div>
       </div>
 
-      <!-- Genre Filter -->
       <div class="filter-row">
         <span class="filter-label">Genre</span>
         <div class="chip active" onclick="toggleChip(this)">All</div>
@@ -150,10 +145,8 @@
         <div class="chip" onclick="toggleChip(this)">Documentary</div>
       </div>
 
-      <!-- Two-column: Continue Watching + New This Week -->
       <div class="two-col">
 
-        <!-- Continue Watching -->
         <div>
           <div class="section-header">
             <span class="section-title">Continue watching</span>
@@ -203,7 +196,6 @@
           </div>
         </div>
 
-        <!-- New This Week -->
         <div>
           <div class="section-header">
             <span class="section-title">New this week</span>
@@ -244,9 +236,8 @@
           </div>
         </div>
 
-      </div><!-- /.two-col -->
+      </div>
 
-      <!-- Trending Section -->
       <div class="section-header mt-4">
         <span class="section-title">Trending — Drama</span>
         <span class="see-all">View all</span>
@@ -322,34 +313,31 @@
           </div>
         </div>
 
-      </div><!-- /.card-grid -->
+      </div>
 
     </main>
-  </div><!-- /.main -->
+  </div>
 
-</div><!-- /.shell -->
+</div>
 
 <script>
-  /* ── Genre chip toggle ── */
   function toggleChip(el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
   }
 
-  /* ── Sidebar active state ── */
   document.querySelectorAll('.sb-item').forEach(item => {
     item.addEventListener('click', function(e) {
-      e.preventDefault();
+      if (this.getAttribute('href') === '#') {
+        e.preventDefault();
+      }
       document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
       this.classList.add('active');
     });
   });
 
-  /* ── Theme toggle placeholder ── */
   const themeBtn = document.querySelector('.theme-toggle');
   themeBtn.addEventListener('click', () => {
-    /* Wire up to your actual theme system here.
-       For a light mode, swap CSS variable values on :root */
     themeBtn.textContent = themeBtn.textContent.includes('Dark') ? '☀ Light' : '☾ Dark';
   });
 </script>
