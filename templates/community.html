@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Community{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>Community Hub</h2>
+    <p>See what other fans are watching, trending discussions, reviews, and shared recommendations.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Join discussions</button>
+      <button class="btn-ghost">Explore groups</button>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">1.2K</div>
+      <div class="hero-stat-l">Members</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">324</div>
+      <div class="hero-stat-l">Reviews</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">86</div>
+      <div class="hero-stat-l">Live Threads</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">Topics</span>
+  <div class="chip active" onclick="toggleChip(this)">Trending</div>
+  <div class="chip" onclick="toggleChip(this)">Reviews</div>
+  <div class="chip" onclick="toggleChip(this)">Fan Theories</div>
+  <div class="chip" onclick="toggleChip(this)">Recommendations</div>
+  <div class="chip" onclick="toggleChip(this)">News</div>
+</div>
+
+<div class="two-col">
+
+  <div>
+    <div class="section-header">
+      <span class="section-title">Trending Discussions</span>
+      <span class="see-all">View all</span>
+    </div>
+
+    <div class="continue-list">
+
+      <div class="continue-item">
+        <div class="ci-poster p1">S</div>
+        <div class="ci-body">
+          <div class="ci-title">Severance Finale Theory</div>
+          <div class="ci-sub">482 comments · 2h ago</div>
+          <div class="ci-ep">"What Lumon really means?"</div>
+        </div>
+        <span class="badge badge-new">Hot</span>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p4">A</div>
+        <div class="ci-body">
+          <div class="ci-title">Andor Season Review</div>
+          <div class="ci-sub">231 comments · Today</div>
+          <div class="ci-ep">Community rating: 9.7/10</div>
+        </div>
+        <span class="badge badge-finished">Top</span>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p3">B</div>
+        <div class="ci-body">
+          <div class="ci-title">Black Mirror Predictions</div>
+          <div class="ci-sub">164 comments · Yesterday</div>
+          <div class="ci-ep">New episode speculation</div>
+        </div>
+        <span class="badge badge-new">Buzz</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div>
+    <div class="section-header">
+      <span class="section-title">Popular Reviewers</span>
+      <span class="see-all">Follow</span>
+    </div>
+
+    <div class="continue-list">
+
+      <div class="continue-item">
+        <div class="ci-poster p2">JD</div>
+        <div class="ci-body">
+          <div class="ci-title">Jane Doe</div>
+          <div class="ci-sub">Sci-Fi Critic</div>
+          <div class="ci-ep">12.4K followers</div>
+        </div>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p5">MS</div>
+        <div class="ci-body">
+          <div class="ci-title">Mike Stream</div>
+          <div class="ci-sub">Drama Specialist</div>
+          <div class="ci-ep">8.1K followers</div>
+        </div>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p6">AR</div>
+        <div class="ci-body">
+          <div class="ci-title">Alex Reviews</div>
+          <div class="ci-sub">Weekly Top 10 Lists</div>
+          <div class="ci-ep">15K followers</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

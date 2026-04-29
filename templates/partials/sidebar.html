@@ -1,0 +1,80 @@
+<aside class="sidebar">
+
+  <div class="sb-logo">
+    <div class="sb-logo-text">{{ user["username"] }}</div>
+    <div class="sb-logo-sub">Series Tracker</div>
+  </div>
+
+  <div class="sb-section">Main</div>
+  <nav class="sb-nav">
+    <a class="sb-item {% if request.path == '/d/dashboard' %}active{% endif %}" href="{{ url_for('d_dashboard') }}">
+      <span class="sb-icon">&#9675;</span>
+      Discover
+    </a>
+
+    <a class="sb-item {% if request.path == '/d/library' %}active{% endif %}" href="{{ url_for('d_library') }}">
+      <span class="sb-icon">&#9723;</span>
+      My Library
+      <span class="sb-badge">58</span>
+    </a>
+
+    <a class="sb-item {% if request.path == '/d/watchlist' %}active{% endif %}" href="{{ url_for('d_watchlist') }}">
+      <span class="sb-icon">&#9651;</span>
+      Watchlist
+      <span class="sb-badge">12</span>
+    </a>
+
+    <a class="sb-item {% if request.path == '/d/favourites' %}active{% endif %}" href="{{ url_for('d_favourites') }}">
+      <span class="sb-icon">&#9733;</span>
+      Favourites
+    </a>
+  </nav>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-section">Social</div>
+  <nav class="sb-nav">
+    <a class="sb-item {% if request.path == '/d/community' %}active{% endif %}" href="{{ url_for('d_community') }}">
+      <span class="sb-icon">&#9651;</span>
+      Community
+    </a>
+
+    <a class="sb-item {% if request.path == '/d/friends' %}active{% endif %}" href="{{ url_for('d_friends') }}">
+      <span class="sb-icon">&#9723;</span>
+      Friends
+      <span class="sb-badge">3</span>
+    </a>
+  </nav>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-section">Account</div>
+  <nav class="sb-nav">
+    <a class="sb-item {% if request.path == '/d/profile' %}active{% endif %}" href="{{ url_for('d_profile') }}">
+      <span class="sb-icon">&#9651;</span>
+      Profile
+    </a>
+
+    <a class="sb-item {% if request.path == '/d/settings' %}active{% endif %}" href="{{ url_for('d_settings') }}">
+      <span class="sb-icon">&#9723;</span>
+      Settings
+    </a>
+
+    <a class="sb-item" href="{{ url_for('logout') }}">
+      <span class="sb-icon">&#8617;</span>
+      Logout
+    </a>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">{{ user["username"][:2] | upper }}</div>
+      <div>
+        <div class="sb-user-name">{{ user["username"] }}</div>
+        <div class="sb-user-sub">{{ user["email"] }}</div>
+      </div>
+      <span class="sb-cog">&#9881;</span>
+    </div>
+  </div>
+
+</aside>

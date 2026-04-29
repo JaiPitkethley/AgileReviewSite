@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Friends{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>Friends Activity</h2>
+    <p>Track what your friends are watching, sharing, rating, and recommending.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Add friends</button>
+      <button class="btn-ghost">View recommendations</button>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">23</div>
+      <div class="hero-stat-l">Friends</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">87</div>
+      <div class="hero-stat-l">Shared Reviews</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">14</div>
+      <div class="hero-stat-l">Recommendations</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">Filter</span>
+  <div class="chip active" onclick="toggleChip(this)">Recent</div>
+  <div class="chip" onclick="toggleChip(this)">Watching</div>
+  <div class="chip" onclick="toggleChip(this)">Reviews</div>
+  <div class="chip" onclick="toggleChip(this)">Recommendations</div>
+</div>
+
+<div class="section-header mt-4">
+  <span class="section-title">Friends List</span>
+  <span class="see-all">Manage</span>
+</div>
+
+<div class="continue-list">
+
+  <div class="continue-item">
+    <div class="ci-poster p1">JD</div>
+    <div class="ci-body">
+      <div class="ci-title">Jane Doe</div>
+      <div class="ci-sub">Currently watching Severance</div>
+      <div class="ci-ep">Recommended: Silo</div>
+    </div>
+    <span class="badge badge-watching">Online</span>
+  </div>
+
+  <div class="continue-item">
+    <div class="ci-poster p2">MS</div>
+    <div class="ci-body">
+      <div class="ci-title">Mike Smith</div>
+      <div class="ci-sub">Finished White Lotus</div>
+      <div class="ci-ep">Rated ★★★★★</div>
+    </div>
+    <span class="badge badge-finished">Active</span>
+  </div>
+
+  <div class="continue-item">
+    <div class="ci-poster p3">AR</div>
+    <div class="ci-body">
+      <div class="ci-title">Alex Rivers</div>
+      <div class="ci-sub">Started Dune: Prophecy</div>
+      <div class="ci-ep">Shared review yesterday</div>
+    </div>
+    <span class="badge badge-new">New</span>
+  </div>
+
+  <div class="continue-item">
+    <div class="ci-poster p4">LT</div>
+    <div class="ci-body">
+      <div class="ci-title">Lisa Tran</div>
+      <div class="ci-sub">Watching The Bear</div>
+      <div class="ci-ep">Suggested: Fallout</div>
+    </div>
+    <span class="badge badge-watching">Online</span>
+  </div>
+
+  <div class="continue-item">
+    <div class="ci-poster p5">RK</div>
+    <div class="ci-body">
+      <div class="ci-title">Ryan Kim</div>
+      <div class="ci-sub">Completed Andor</div>
+      <div class="ci-ep">Top score: 9.8/10</div>
+    </div>
+    <span class="badge badge-finished">Top</span>
+  </div>
+
+</div>
+
+{% endblock %}

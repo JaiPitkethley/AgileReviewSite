@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Favourites{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>{{ user["username"] }}'s Favourites</h2>
+    <p>Your all-time top-rated series collection — the shows you truly loved.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Rewatch favourites</button>
+      <button class="btn-ghost">Discover similar series</button>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">18</div>
+      <div class="hero-stat-l">Favourites</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">9.4</div>
+      <div class="hero-stat-l">Avg Rating</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">124</div>
+      <div class="hero-stat-l">Rewatched Eps</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">Filter</span>
+  <div class="chip active" onclick="toggleChip(this)">All</div>
+  <div class="chip" onclick="toggleChip(this)">Drama</div>
+  <div class="chip" onclick="toggleChip(this)">Sci-Fi</div>
+  <div class="chip" onclick="toggleChip(this)">Thriller</div>
+  <div class="chip" onclick="toggleChip(this)">Comedy</div>
+</div>
+
+<div class="section-header mt-4">
+  <span class="section-title">Top Picks</span>
+  <span class="see-all">Rank by score</span>
+</div>
+
+<div class="card-grid">
+
+  <div class="card">
+    <div class="poster p1">
+      S
+      <span class="badge badge-finished">Top Rated</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Severance</div>
+      <div class="card-sub">
+        Apple TV+
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p5">
+      W
+      <span class="badge badge-finished">Classic</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">White Lotus</div>
+      <div class="card-sub">
+        HBO
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p2">
+      T
+      <span class="badge badge-finished">Loved</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">The Bear</div>
+      <div class="card-sub">
+        Hulu
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p3">
+      B
+      <span class="badge badge-finished">Essential</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Black Mirror</div>
+      <div class="card-sub">
+        Netflix
+        <div class="stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p4">
+      A
+      <span class="badge badge-finished">Epic</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Andor</div>
+      <div class="card-sub">
+        Disney+
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -169,6 +169,54 @@ def logout():
     flash("You have been signed out.", "success")
     return redirect(url_for("landing"))
 
+## dummy part for development, to be replaced with real user data and functionality later
+## Dashboard
+@app.route("/d/dashboard")
+def d_dashboard():
+    return render_template("reviewsitehome.html", user={"username": "James"})
+
+
+## Profile
+@app.route("/d/profile")
+def d_profile():
+    return render_template("profile.html", user={"username": "James"})
+
+
+## My Library
+@app.route("/d/library")
+def d_library():
+    return render_template("library.html", user={"username": "James"})
+
+
+## Watchlist
+@app.route("/d/watchlist")
+def d_watchlist():
+    return render_template("watchlist.html", user={"username": "James"})
+
+
+## Favourites
+@app.route("/d/favourites")
+def d_favourites():
+    return render_template("favourites.html", user={"username": "James"})
+
+
+## Community
+@app.route("/d/community")
+def d_community():
+    return render_template("community.html", user={"username": "James"})
+
+
+## Friends
+@app.route("/d/friends")
+def d_friends():
+    return render_template("friends.html", user={"username": "James"})
+
+
+## Settings
+@app.route("/d/settings")
+def d_settings():
+    return render_template("settings.html", user={"username": "James"})
+
 
 if __name__ == "__main__":
     init_db()

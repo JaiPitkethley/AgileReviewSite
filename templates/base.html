@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Series Tracker{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
+</head>
+
+<body>
+
+  <div class="shell">
+
+    {% include "partials/sidebar.html" %}
+
+    <div class="main">
+
+      {% include "partials/topbar.html" %}
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+
+    </div>
+
+  </div>
+
+  <script>
+    function toggleChip(el) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    document.querySelectorAll('.sb-item').forEach(item => {
+      item.addEventListener('click', function (e) {
+        if (this.getAttribute('href') === '#') {
+          e.preventDefault();
+        }
+        document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    const themeBtn = document.querySelector('.theme-toggle');
+
+    function setTheme(mode) {
+      if (mode === "light") {
+        document.body.classList.add("light-mode");
+        themeBtn.textContent = "☀ Light";
+        localStorage.setItem("theme", "light");
+      } else {
+        document.body.classList.remove("light-mode");
+        themeBtn.textContent = "☾ Dark";
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+
+    themeBtn.addEventListener("click", () => {
+      const isLight = document.body.classList.contains("light-mode");
+      setTheme(isLight ? "dark" : "light");
+    });
+  </script>
+
+</body>
+
+</html>
