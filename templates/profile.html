@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Profile Hero -->
+<div class="hero-banner profile-hero">
+  <div class="hero-accent-bar"></div>
+
+  <div class="profile-avatar-xl">JL</div>
+
+  <div class="hero-text">
+    <h2>Jamie Lee</h2>
+    <p>Pro account · Drama, Sci-Fi & Thriller fan. Tracking 58 series, 12 watchlist items, and 19 reviews.</p>
+
+    <div class="hero-actions">
+      <button class="btn-primary">Edit profile</button>
+      <button class="btn-ghost">Log out</button>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">58</div>
+      <div class="hero-stat-l">Library</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">12</div>
+      <div class="hero-stat-l">Watchlist</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">19</div>
+      <div class="hero-stat-l">Reviews</div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Tabs -->
+<div class="filter-row">
+  <span class="filter-label">Profile</span>
+  <div class="chip active">Overview</div>
+  <div class="chip">Reviews</div>
+  <div class="chip">Watchlist</div>
+  <div class="chip">Friends</div>
+</div>
+
+<div class="two-col">
+
+  <!-- Watching Progress -->
+  <div>
+    <div class="section-header">
+      <span class="section-title">Watching progress</span>
+      <span class="see-all">View all</span>
+    </div>
+
+    <div class="continue-list">
+      <div class="continue-item">
+        <div class="ci-poster p1">S</div>
+        <div class="ci-body">
+          <div class="ci-title">Severance</div>
+          <div class="ci-sub">S2 · Ep 7 — Woe's Hollow</div>
+          <div class="ci-bar">
+            <div class="ci-track">
+              <div class="ci-fill" style="width:70%"></div>
+            </div>
+            <span class="ci-pct">70%</span>
+          </div>
+        </div>
+        <span class="badge badge-watching">Watching</span>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p2">T</div>
+        <div class="ci-body">
+          <div class="ci-title">The Bear</div>
+          <div class="ci-sub">S3 · Ep 3 — Doors</div>
+          <div class="ci-bar">
+            <div class="ci-track">
+              <div class="ci-fill" style="width:30%"></div>
+            </div>
+            <span class="ci-pct">30%</span>
+          </div>
+        </div>
+        <span class="badge badge-watching">Watching</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Genre Breakdown -->
+  <div>
+    <div class="section-header">
+      <span class="section-title">Genre breakdown</span>
+    </div>
+
+    <div class="profile-panel">
+      <div class="genre-row">
+        <span>Drama</span>
+        <div class="ci-track">
+          <div class="ci-fill" style="width:32%"></div>
+        </div>
+        <strong>32%</strong>
+      </div>
+
+      <div class="genre-row">
+        <span>Sci-Fi</span>
+        <div class="ci-track">
+          <div class="ci-fill" style="width:24%"></div>
+        </div>
+        <strong>24%</strong>
+      </div>
+
+      <div class="genre-row">
+        <span>Thriller</span>
+        <div class="ci-track">
+          <div class="ci-fill" style="width:18%"></div>
+        </div>
+        <strong>18%</strong>
+      </div>
+
+      <div class="genre-row">
+        <span>Comedy</span>
+        <div class="ci-track">
+          <div class="ci-fill" style="width:14%"></div>
+        </div>
+        <strong>14%</strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent Reviews -->
+<div class="section-header mt-28">
+  <span class="section-title">Recent reviews</span>
+  <span class="see-all">View all</span>
+</div>
+
+<div class="continue-list">
+  <div class="continue-item review-profile-item">
+    <div class="ci-poster p5">W</div>
+    <div class="ci-body">
+      <div class="ci-title">White Lotus S3</div>
+      <div class="stars">★★★★☆</div>
+      <div class="ci-sub">Beautifully shot and tense, but the ending felt a little rushed.</div>
+    </div>
+    <span class="badge badge-finished">Reviewed</span>
+  </div>
+
+  <div class="continue-item review-profile-item">
+    <div class="ci-poster p3">B</div>
+    <div class="ci-body">
+      <div class="ci-title">Black Mirror</div>
+      <div class="stars">★★★★★</div>
+      <div class="ci-sub">Still one of the best shows for dark, futuristic storytelling.</div>
+    </div>
+    <span class="badge badge-finished">Reviewed</span>
+  </div>
+</div>
+
+<!-- Account Shortcuts -->
+<div class="section-header mt-28">
+  <span class="section-title">Account shortcuts</span>
+</div>
+
+<div class="card-grid profile-shortcuts">
+  <a class="profile-shortcut-card" href="mylibrary.html">
+    <span>My Library</span>
+    <strong>58</strong>
+  </a>
+
+  <a class="profile-shortcut-card" href="watchlist.html">
+    <span>Watchlist</span>
+    <strong>12</strong>
+  </a>
+
+  <a class="profile-shortcut-card" href="favourites.html">
+    <span>Favourites</span>
+    <strong>8</strong>
+  </a>
+
+  <a class="profile-shortcut-card" href="friends.html">
+    <span>Friends</span>
+    <strong>3</strong>
+  </a>
+</div>
+{% endblock %}

@@ -1,346 +1,230 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Series Tracker Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="shell">
+{% block title %}Dashboard{% endblock %}
 
-  <aside class="sidebar">
+{% block content %}
 
-    <div class="sb-logo">
-      <div class="sb-logo-text">{{ user["username"] }}</div>
-      <div class="sb-logo-sub">Series Tracker</div>
+<div class="hero-banner">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>Welcome back, {{ user["username"] }}</h2>
+    <p>You have 3 series in progress and 2 new episodes dropped this week on your watchlist.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Continue watching</button>
+      <button class="btn-ghost">Browse new releases</button>
     </div>
-
-    <div class="sb-section">Main</div>
-    <nav class="sb-nav">
-      <a class="sb-item active" href="#">
-        <span class="sb-icon">&#9675;</span>
-        Discover
-      </a>
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9723;</span>
-        My Library
-        <span class="sb-badge">58</span>
-      </a>
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9651;</span>
-        Watchlist
-        <span class="sb-badge">12</span>
-      </a>
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9733;</span>
-        Favourites
-      </a>
-    </nav>
-
-    <div class="sb-divider"></div>
-
-    <div class="sb-section">Social</div>
-    <nav class="sb-nav">
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9651;</span>
-        Community
-      </a>
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9723;</span>
-        Friends
-        <span class="sb-badge">3</span>
-      </a>
-    </nav>
-
-    <div class="sb-divider"></div>
-
-    <div class="sb-section">Account</div>
-    <nav class="sb-nav">
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9651;</span>
-        Profile
-      </a>
-      <a class="sb-item" href="#">
-        <span class="sb-icon">&#9723;</span>
-        Settings
-      </a>
-      <a class="sb-item" href="{{ url_for('logout') }}">
-        <span class="sb-icon">&#8617;</span>
-        Logout
-      </a>
-    </nav>
-
-    <div class="sb-bottom">
-      <div class="sb-user">
-        <div class="sb-avatar">{{ user["username"][:2] | upper }}</div>
-        <div>
-          <div class="sb-user-name">{{ user["username"] }}</div>
-          <div class="sb-user-sub">{{ user["email"] }}</div>
-        </div>
-        <span class="sb-cog">&#9881;</span>
-      </div>
+  </div>
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">47</div>
+      <div class="hero-stat-l">Finished</div>
     </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">8</div>
+      <div class="hero-stat-l">Watching</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">312</div>
+      <div class="hero-stat-l">Episodes</div>
+    </div>
+  </div>
+</div>
 
-  </aside>
+<div class="filter-row">
+  <span class="filter-label">Genre</span>
+  <div class="chip active" onclick="toggleChip(this)">All</div>
+  <div class="chip" onclick="toggleChip(this)">Drama</div>
+  <div class="chip" onclick="toggleChip(this)">Thriller</div>
+  <div class="chip" onclick="toggleChip(this)">Sci-Fi</div>
+  <div class="chip" onclick="toggleChip(this)">Crime</div>
+  <div class="chip" onclick="toggleChip(this)">Fantasy</div>
+  <div class="chip" onclick="toggleChip(this)">Comedy</div>
+  <div class="chip" onclick="toggleChip(this)">Documentary</div>
+</div>
 
-  <div class="main">
+<div class="two-col">
 
-    <header class="topbar">
-      <div class="topbar-search">
-        <span class="topbar-search-icon">&#9906;</span>
-        <input type="text" placeholder="Search series, director, cast...">
-      </div>
-      <div class="topbar-right">
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        <button class="theme-toggle">&#9790; Dark</button>
-        <button class="notif-btn">
-          &#9825;
-          <span class="notif-dot"></span>
-        </button>
-      </div>
-    </header>
+  <div>
+    <div class="section-header">
+      <span class="section-title">Continue watching</span>
+      <span class="see-all">View all</span>
+    </div>
+    <div class="continue-list">
 
-    <main class="content">
-
-      <div class="hero-banner">
-        <div class="hero-accent-bar"></div>
-        <div class="hero-text">
-          <h2>Welcome back, {{ user["username"] }}</h2>
-          <p>You have 3 series in progress and 2 new episodes dropped this week on your watchlist.</p>
-          <div class="hero-actions">
-            <button class="btn-primary">Continue watching</button>
-            <button class="btn-ghost">Browse new releases</button>
+      <div class="continue-item">
+        <div class="ci-poster p1">S</div>
+        <div class="ci-body">
+          <div class="ci-title">Severance</div>
+          <div class="ci-sub">S2 · Ep 7 — Woe's Hollow</div>
+          <div class="ci-bar">
+            <div class="ci-track">
+              <div class="ci-fill" style="width:70%"></div>
+            </div>
+            <span class="ci-pct">70%</span>
           </div>
         </div>
-        <div class="hero-stat-row">
-          <div class="hero-stat">
-            <div class="hero-stat-n">47</div>
-            <div class="hero-stat-l">Finished</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-n">8</div>
-            <div class="hero-stat-l">Watching</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-n">312</div>
-            <div class="hero-stat-l">Episodes</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <span class="filter-label">Genre</span>
-        <div class="chip active" onclick="toggleChip(this)">All</div>
-        <div class="chip" onclick="toggleChip(this)">Drama</div>
-        <div class="chip" onclick="toggleChip(this)">Thriller</div>
-        <div class="chip" onclick="toggleChip(this)">Sci-Fi</div>
-        <div class="chip" onclick="toggleChip(this)">Crime</div>
-        <div class="chip" onclick="toggleChip(this)">Fantasy</div>
-        <div class="chip" onclick="toggleChip(this)">Comedy</div>
-        <div class="chip" onclick="toggleChip(this)">Documentary</div>
+        <div class="play-btn">&#9654;</div>
       </div>
 
-      <div class="two-col">
-
-        <div>
-          <div class="section-header">
-            <span class="section-title">Continue watching</span>
-            <span class="see-all">View all</span>
-          </div>
-          <div class="continue-list">
-
-            <div class="continue-item">
-              <div class="ci-poster p1">S</div>
-              <div class="ci-body">
-                <div class="ci-title">Severance</div>
-                <div class="ci-sub">S2 · Ep 7 — Woe's Hollow</div>
-                <div class="ci-bar">
-                  <div class="ci-track"><div class="ci-fill" style="width:70%"></div></div>
-                  <span class="ci-pct">70%</span>
-                </div>
-              </div>
-              <div class="play-btn">&#9654;</div>
+      <div class="continue-item">
+        <div class="ci-poster p2">T</div>
+        <div class="ci-body">
+          <div class="ci-title">The Bear</div>
+          <div class="ci-sub">S3 · Ep 3 — Doors</div>
+          <div class="ci-bar">
+            <div class="ci-track">
+              <div class="ci-fill" style="width:30%"></div>
             </div>
-
-            <div class="continue-item">
-              <div class="ci-poster p2">T</div>
-              <div class="ci-body">
-                <div class="ci-title">The Bear</div>
-                <div class="ci-sub">S3 · Ep 3 — Doors</div>
-                <div class="ci-bar">
-                  <div class="ci-track"><div class="ci-fill" style="width:30%"></div></div>
-                  <span class="ci-pct">30%</span>
-                </div>
-              </div>
-              <div class="play-btn">&#9654;</div>
-            </div>
-
-            <div class="continue-item">
-              <div class="ci-poster p3">O</div>
-              <div class="ci-body">
-                <div class="ci-title">Outer Banks</div>
-                <div class="ci-sub">S4 · Ep 8 — The Lighthouse</div>
-                <div class="ci-bar">
-                  <div class="ci-track"><div class="ci-fill" style="width:85%"></div></div>
-                  <span class="ci-pct">85%</span>
-                </div>
-              </div>
-              <div class="play-btn">&#9654;</div>
-            </div>
-
+            <span class="ci-pct">30%</span>
           </div>
         </div>
-
-        <div>
-          <div class="section-header">
-            <span class="section-title">New this week</span>
-            <span class="see-all">View all</span>
-          </div>
-          <div class="continue-list">
-
-            <div class="continue-item">
-              <div class="ci-poster p4">A</div>
-              <div class="ci-body">
-                <div class="ci-title">Andor S2</div>
-                <div class="ci-sub">Ep 3 dropped · Disney+</div>
-                <div class="ci-ep">Added to your watchlist</div>
-              </div>
-              <span class="badge badge-new">New</span>
-            </div>
-
-            <div class="continue-item">
-              <div class="ci-poster p5">W</div>
-              <div class="ci-body">
-                <div class="ci-title">White Lotus S3</div>
-                <div class="ci-sub">Finale aired · HBO</div>
-                <div class="ci-ep">You finished this!</div>
-              </div>
-              <span class="badge badge-finished">Done</span>
-            </div>
-
-            <div class="continue-item">
-              <div class="ci-poster p6">P</div>
-              <div class="ci-body">
-                <div class="ci-title">Paradise</div>
-                <div class="ci-sub">S1 now streaming · Hulu</div>
-                <div class="ci-ep">On your wishlist</div>
-              </div>
-              <span class="badge badge-new">New</span>
-            </div>
-
-          </div>
-        </div>
-
+        <div class="play-btn">&#9654;</div>
       </div>
 
-      <div class="section-header mt-4">
-        <span class="section-title">Trending — Drama</span>
-        <span class="see-all">View all</span>
-      </div>
-      <div class="card-grid">
-
-        <div class="card">
-          <div class="poster p1">
-            S
-            <span class="badge badge-watching">Watching</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
-          <div class="card-body">
-            <div class="card-title">Severance</div>
-            <div class="card-sub">
-              Apple TV+
-              <div class="stars">★★★★★</div>
+      <div class="continue-item">
+        <div class="ci-poster p3">O</div>
+        <div class="ci-body">
+          <div class="ci-title">Outer Banks</div>
+          <div class="ci-sub">S4 · Ep 8 — The Lighthouse</div>
+          <div class="ci-bar">
+            <div class="ci-track">
+              <div class="ci-fill" style="width:85%"></div>
             </div>
+            <span class="ci-pct">85%</span>
           </div>
         </div>
-
-        <div class="card">
-          <div class="poster p6">D</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-          <div class="card-body">
-            <div class="card-title">Dune: Prophecy</div>
-            <div class="card-sub">
-              HBO Max
-              <div class="stars">★★★★☆</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="poster p4">
-            A
-            <span class="badge badge-new">New ep</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-          <div class="card-body">
-            <div class="card-title">Andor S2</div>
-            <div class="card-sub">
-              Disney+
-              <div class="stars">★★★★★</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="poster p5">
-            W
-            <span class="badge badge-finished">Finished</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
-          <div class="card-body">
-            <div class="card-title">White Lotus</div>
-            <div class="card-sub">
-              HBO Max
-              <div class="stars">★★★★★</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="poster p3">B</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-          <div class="card-body">
-            <div class="card-title">Black Mirror</div>
-            <div class="card-sub">
-              Netflix
-              <div class="stars">★★★★☆</div>
-            </div>
-          </div>
-        </div>
-
+        <div class="play-btn">&#9654;</div>
       </div>
 
-    </main>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-header">
+      <span class="section-title">New this week</span>
+      <span class="see-all">View all</span>
+    </div>
+    <div class="continue-list">
+
+      <div class="continue-item">
+        <div class="ci-poster p4">A</div>
+        <div class="ci-body">
+          <div class="ci-title">Andor S2</div>
+          <div class="ci-sub">Ep 3 dropped · Disney+</div>
+          <div class="ci-ep">Added to your watchlist</div>
+        </div>
+        <span class="badge badge-new">New</span>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p5">W</div>
+        <div class="ci-body">
+          <div class="ci-title">White Lotus S3</div>
+          <div class="ci-sub">Finale aired · HBO</div>
+          <div class="ci-ep">You finished this!</div>
+        </div>
+        <span class="badge badge-finished">Done</span>
+      </div>
+
+      <div class="continue-item">
+        <div class="ci-poster p6">P</div>
+        <div class="ci-body">
+          <div class="ci-title">Paradise</div>
+          <div class="ci-sub">S1 now streaming · Hulu</div>
+          <div class="ci-ep">On your wishlist</div>
+        </div>
+        <span class="badge badge-new">New</span>
+      </div>
+
+    </div>
   </div>
 
 </div>
 
-<script>
-  function toggleChip(el) {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-  }
+<div class="section-header mt-4">
+  <span class="section-title">Trending — Drama</span>
+  <span class="see-all">View all</span>
+</div>
+<div class="card-grid">
 
-  document.querySelectorAll('.sb-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-      if (this.getAttribute('href') === '#') {
-        e.preventDefault();
-      }
-      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
+  <div class="card">
+    <div class="poster p1">
+      S
+      <span class="badge badge-watching">Watching</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:70%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Severance</div>
+      <div class="card-sub">
+        Apple TV+
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
 
-  const themeBtn = document.querySelector('.theme-toggle');
-  themeBtn.addEventListener('click', () => {
-    themeBtn.textContent = themeBtn.textContent.includes('Dark') ? '☀ Light' : '☾ Dark';
-  });
-</script>
+  <div class="card">
+    <div class="poster p6">D</div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Dune: Prophecy</div>
+      <div class="card-sub">
+        HBO Max
+        <div class="stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
 
-</body>
-</html>
+  <div class="card">
+    <div class="poster p4">
+      A
+      <span class="badge badge-new">New ep</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Andor S2</div>
+      <div class="card-sub">
+        Disney+
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p5">
+      W
+      <span class="badge badge-finished">Finished</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:100%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">White Lotus</div>
+      <div class="card-sub">
+        HBO Max
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p3">B</div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Black Mirror</div>
+      <div class="card-sub">
+        Netflix
+        <div class="stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
