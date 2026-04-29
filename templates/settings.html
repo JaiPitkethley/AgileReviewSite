@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+  <section class="hero">
+    <div>
+      <h1>Settings</h1>
+      <p>Manage your account, appearance, notifications, and privacy preferences for your series review tracker.</p>
+    </div>
+    <button class="save-btn">Save Changes</button>
+  </section>
+
+  <section class="stats-strip">
+    <div class="stat">
+      <div class="label">Shows tracked</div>
+      <div class="value">58</div>
+    </div>
+    <div class="stat">
+      <div class="label">Watchlist</div>
+      <div class="value">12</div>
+    </div>
+    <div class="stat">
+      <div class="label">Reviews posted</div>
+      <div class="value">34</div>
+    </div>
+    <div class="stat">
+      <div class="label">Friends</div>
+      <div class="value">3</div>
+    </div>
+  </section>
+
+  <section class="grid">
+
+    <div class="card">
+      <h2>Account</h2>
+      <div class="inline-fields">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" value="{{ user['username'] }}" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" value="{{ user['email'] }}" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" value="password123" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Appearance</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Theme</h3>
+          <p>Choose how the app looks across the site.</p>
+        </div>
+        <select>
+          <option>Dark</option>
+          <option>Light</option>
+          <option>System</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Accent Color</h3>
+          <p>Highlight buttons and active states.</p>
+        </div>
+        <span class="pill">Purple</span>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Compact Layout</h3>
+          <p>Reduce spacing to fit more content on screen.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Watch Preferences</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Default status for new shows</h3>
+          <p>Where a newly added show should go first.</p>
+        </div>
+        <select>
+          <option>Want to Watch</option>
+          <option>Watching</option>
+          <option>Finished</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Auto-mark episodes</h3>
+          <p>Mark the next episode watched automatically.</p>
+        </div>
+        <div class="toggle"></div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Hide spoilers by default</h3>
+          <p>Blur spoiler-heavy reviews and comments.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Notifications</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Friend activity</h3>
+          <p>Get notified when friends review or rate a series.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>New episode alerts</h3>
+          <p>Receive reminders when a tracked show releases an episode.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Weekly summary</h3>
+          <p>A recap of what you watched and what is upcoming.</p>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Privacy & Social</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Profile visibility</h3>
+          <p>Control who can view your profile and stats.</p>
+        </div>
+        <select>
+          <option>Public</option>
+          <option>Friends Only</option>
+          <option>Private</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Show my watchlist</h3>
+          <p>Let other users browse what you plan to watch.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Allow friend requests</h3>
+          <p>Allow other users to send you connection requests.</p>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Data & Security</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Export my data</h3>
+          <p>Download your ratings, reviews, and watch history.</p>
+        </div>
+        <button class="ghost-btn">Export</button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Log out of all devices</h3>
+          <p>End all active sessions except the current one.</p>
+        </div>
+        <button class="ghost-btn">Log Out</button>
+      </div>
+
+      <div class="danger-zone">
+        <h3>Danger Zone</h3>
+        <p>Permanently delete your account and all tracking data.</p>
+        <button>Delete Account</button>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+{% endblock %}

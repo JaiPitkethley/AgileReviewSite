@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Watchlist{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>{{ user["username"] }}'s Watchlist</h2>
+    <p>Your saved upcoming series, recommendations, and future binge queue.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Start watching</button>
+      <button class="btn-ghost">Browse recommendations</button>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">12</div>
+      <div class="hero-stat-l">Saved</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">4</div>
+      <div class="hero-stat-l">New Releases</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-n">3</div>
+      <div class="hero-stat-l">Priority</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">Filter</span>
+  <div class="chip active" onclick="toggleChip(this)">All</div>
+  <div class="chip" onclick="toggleChip(this)">New</div>
+  <div class="chip" onclick="toggleChip(this)">Upcoming</div>
+  <div class="chip" onclick="toggleChip(this)">Priority</div>
+  <div class="chip" onclick="toggleChip(this)">Recommended</div>
+</div>
+
+<div class="section-header mt-4">
+  <span class="section-title">Saved Series</span>
+  <span class="see-all">Manage all</span>
+</div>
+
+<div class="card-grid">
+
+  <div class="card">
+    <div class="poster p4">
+      A
+      <span class="badge badge-new">New</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Andor S2</div>
+      <div class="card-sub">
+        Disney+
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p6">
+      P
+      <span class="badge badge-new">Upcoming</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Paradise</div>
+      <div class="card-sub">
+        Hulu
+        <div class="stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p3">
+      D
+      <span class="badge badge-new">Priority</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Dune: Prophecy</div>
+      <div class="card-sub">
+        HBO Max
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p5">S</div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Silo</div>
+      <div class="card-sub">
+        Apple TV+
+        <div class="stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="poster p2">F</div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Fallout</div>
+      <div class="card-sub">
+        Prime Video
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
