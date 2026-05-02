@@ -30,6 +30,8 @@ def close_db(error=None):
 
 def init_db():
     conn = sqlite3.connect(DATABASE)
+
+    # Users table
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -41,8 +43,32 @@ def init_db():
         )
         """
     )
+
+    # Watchlist table
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS watchlist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            tmdb_id INTEGER NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, tmdb_id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        """
+    )
+
     conn.commit()
     conn.close()
+
+import requests
+
+TMDB_API_KEY = "YOUR_API_KEY_HERE"
+
+def get_show_details(tmdb_id):
+    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={TMDB_API_KEY}"
+    response = requests.get(url)
+    return response.json()
 
 
 @app.before_request
@@ -162,6 +188,58 @@ def login():
 def dashboard():
     return render_template("reviewsitehome.html", user=g.user)
 
+@app.route("/watchlist/add", methods=["POST"])
+@login_required
+def add_to_watchlist():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if not tmdb_id:
+        flash("Invalid show.", "error")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    db = get_db()
+    try:
+        db.execute(
+            "INSERT INTO watchlist (user_id, tmdb_id) VALUES (?, ?)",
+            (g.user["id"], tmdb_id)
+        )
+        db.commit()
+        flash("Added to your watchlist.", "success")
+    except sqlite3.IntegrityError:
+        flash("Already in your watchlist.", "info")
+
+    return redirect(request.referrer or url_for("dashboard"))
+
+@app.route("/watchlist/remove", methods=["POST"])
+@login_required
+def remove_from_watchlist():
+    tmdb_id = request.form.get("tmdb_id")
+
+    db = get_db()
+    db.execute(
+        "DELETE FROM watchlist WHERE user_id = ? AND tmdb_id = ?",
+        (g.user["id"], tmdb_id)
+    )
+    db.commit()
+
+    flash("Removed from your watchlist.", "success")
+    return redirect(request.referrer or url_for("dashboard"))
+
+@app.route("/watchlist")
+@login_required
+def watchlist():
+    db = get_db()
+    items = db.execute(
+        "SELECT tmdb_id FROM watchlist WHERE user_id = ?",
+        (g.user["id"],)
+    ).fetchall()
+
+    shows = []
+    for item in items:
+        show = get_show_details(item["tmdb_id"])
+        shows.append(show)
+
+    return render_template("watchlist.html", shows=shows, user=g.user)
 
 @app.route("/logout")
 def logout():
