@@ -1,3 +1,8 @@
 .DS_Store
 users.db
+*.sqlite3
+__pycache__/
+instance/
+.env
+
 __pycache__/
