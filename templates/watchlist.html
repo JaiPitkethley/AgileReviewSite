@@ -7,7 +7,7 @@
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
   <div class="hero-text">
-    <h2>{{ user["username"] }}'s Watchlist</h2>
+    <h2>{{ user.username }}'s Watchlist</h2>
     <p>Your saved upcoming series, recommendations, and future binge queue.</p>
     <div class="hero-actions">
       <button class="btn-primary">Start watching</button>
@@ -17,7 +17,7 @@
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">12</div>
+      <div class="hero-stat-n">{{ shows|length }}</div>
       <div class="hero-stat-l">Saved</div>
     </div>
     <div class="hero-stat">
@@ -47,84 +47,37 @@
 
 <div class="card-grid">
 
-  <div class="card">
-    <div class="poster p4">
-      A
-      <span class="badge badge-new">New</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Andor S2</div>
-      <div class="card-sub">
-        Disney+
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+  {% if shows %}
+    {% for show in shows %}
+      <div class="card">
 
-  <div class="card">
-    <div class="poster p6">
-      P
-      <span class="badge badge-new">Upcoming</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Paradise</div>
-      <div class="card-sub">
-        Hulu
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
+        <div class="poster" 
+             style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+          <span class="badge badge-new">Saved</span>
+        </div>
 
-  <div class="card">
-    <div class="poster p3">
-      D
-      <span class="badge badge-new">Priority</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Dune: Prophecy</div>
-      <div class="card-sub">
-        HBO Max
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:0%"></div>
+        </div>
 
-  <div class="card">
-    <div class="poster p5">S</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Silo</div>
-      <div class="card-sub">
-        Apple TV+
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
+        <div class="card-body">
+          <div class="card-title">{{ show.name }}</div>
+          <div class="card-sub">
+            TMDB Rating: {{ show.vote_average }}
+            <div class="stars">★★★★★</div>
+          </div>
 
-  <div class="card">
-    <div class="poster p2">F</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Fallout</div>
-      <div class="card-sub">
-        Prime Video
-        <div class="stars">★★★★★</div>
+          <form action="/watchlist/remove" method="POST">
+            <input type="hidden" name="tmdb_id" value="{{ show.id }}">
+            <button class="btn-ghost" type="submit">Remove</button>
+          </form>
+        </div>
+
       </div>
-    </div>
-  </div>
+    {% endfor %}
+  {% else %}
+    <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
+  {% endif %}
 
 </div>
 
