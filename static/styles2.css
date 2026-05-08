@@ -1039,3 +1039,19 @@ select,
     align-items: stretch;
   }
 }
+.topbar-search {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+}
+
+.add-watchlist-btn {
+  margin-top: 12px;
+  width: 100%;
+}
