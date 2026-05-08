@@ -1055,3 +1055,44 @@ select,
   margin-top: 12px;
   width: 100%;
 }
+
+/* Fix topbar search after global input styles */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+}
+
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  flex: 0 1 400px;
+  width: 400px;
+  max-width: 400px;
+  height: 42px;
+  max-height: 42px;
+}
+
+.topbar-search input[type="text"] {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--sans);
+  outline: none;
+  flex: 1;
+  width: 100%;
+  height: auto;
+}
+
+.topbar-right {
+  margin-left: auto;
+}
