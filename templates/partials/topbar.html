@@ -1,17 +1,6 @@
-<header class="topbar">
-  <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_watchlist') }}" method="get">
-    <span class="topbar-search-icon">&#9906;</span>
+<form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_dashboard') }}" method="get">
+  <span class="topbar-search-icon">&#9906;</span>
 
-    <input id="topbarSearchInput" name="q" type="text" placeholder="Search series, director, cast..." autocomplete="off"
-      value="{{ request.args.get('q', '') }}">
-  </form>
-
-  <div class="topbar-right">
-    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-    <button class="theme-toggle">☾ Dark</button>
-    <button class="notif-btn">
-      &#9825;
-      <span class="notif-dot"></span>
-    </button>
-  </div>
-</header>
+  <input id="topbarSearchInput" name="q" type="text" placeholder="Search series, director, cast..." autocomplete="off"
+    value="{{ request.args.get('q', '') }}">
+</form>

@@ -41,7 +41,7 @@
   <div class="chip" onclick="toggleChip(this)">Comedy</div>
   <div class="chip" onclick="toggleChip(this)">Documentary</div>
 </div>
-
+<div id="discoverContent"></div>
 <div class="two-col">
 
   <div>
@@ -142,11 +142,17 @@
 </div>
 
 <div class="section-header mt-4">
-  <span class="section-title">Trending — Drama</span>
+  <span class="section-title" id="discoverSectionTitle">
+    {% if request.args.get('q') %}
+    Search Results for "{{ request.args.get('q') }}"
+    {% else %}
+    Trending — Drama
+    {% endif %}
+  </span>
   <span class="see-all">View all</span>
 </div>
-<div class="card-grid">
 
+<div class="card-grid" id="topbarSearchResults">
   <div class="card">
     <div class="poster p1">
       S
@@ -226,5 +232,6 @@
     </div>
   </div>
 
+</div>
 </div>
 {% endblock %}
