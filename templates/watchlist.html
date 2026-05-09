@@ -39,7 +39,13 @@
   <div class="chip" onclick="toggleChip(this)">Priority</div>
   <div class="chip" onclick="toggleChip(this)">Recommended</div>
 </div>
+{% if request.args.get('q') %}
+<div class="section-header mt-4" id="searchResultsHeader">
+  <span class="section-title">Search Results for "{{ request.args.get('q') }}"</span>
+</div>
 
+<div id="topbarSearchResults" class="card-grid"></div>
+{% endif %}
 <div class="section-header mt-4">
   <span class="section-title">Saved Series</span>
   <span class="see-all">Manage all</span>
@@ -48,35 +54,34 @@
 <div class="card-grid">
 
   {% if shows %}
-    {% for show in shows %}
-      <div class="card">
+  {% for show in shows %}
+  <div class="card">
 
-        <div class="poster" 
-             style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
-          <span class="badge badge-new">Saved</span>
-        </div>
+    <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+      <span class="badge badge-new">Saved</span>
+    </div>
 
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:0%"></div>
-        </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:0%"></div>
+    </div>
 
-        <div class="card-body">
-          <div class="card-title">{{ show.name }}</div>
-          <div class="card-sub">
-            TMDB Rating: {{ show.vote_average }}
-            <div class="stars">★★★★★</div>
-          </div>
-
-          <form action="/watchlist/remove" method="POST">
-            <input type="hidden" name="tmdb_id" value="{{ show.id }}">
-            <button class="btn-ghost" type="submit">Remove</button>
-          </form>
-        </div>
-
+    <div class="card-body">
+      <div class="card-title">{{ show.name }}</div>
+      <div class="card-sub">
+        TMDB Rating: {{ show.vote_average }}
+        <div class="stars">★★★★★</div>
       </div>
-    {% endfor %}
+
+      <form action="/watchlist/remove" method="POST">
+        <input type="hidden" name="tmdb_id" value="{{ show.id }}">
+        <button class="btn-ghost" type="submit">Remove</button>
+      </form>
+    </div>
+
+  </div>
+  {% endfor %}
   {% else %}
-    <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
+  <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
   {% endif %}
 
 </div>
