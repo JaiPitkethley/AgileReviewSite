@@ -47,9 +47,10 @@ class Watchlist(db.Model):
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
 
-#here is where our api keys will go, make sure not to push the real ones
-TMDB_API_KEY = "key goes here"
-TMDB_READ_TOKEN = "read token goes here"
+
+TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
+TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
+TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 def get_show_details(tmdb_id):
     url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={TMDB_API_KEY}"
@@ -158,6 +159,18 @@ def login():
 @login_required
 def dashboard():
     return render_template("reviewsitehome.html", user=g.user)
+@app.route("/series/<int:series_id>")
+def series_detail(series_id):
+    url = f"https://api.themoviedb.org/3/tv/{series_id}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    response = requests.get(url, params=params)
+    series = response.json()
+
+    return render_template("seriesdetail.html", series=series, user=g.user)
 
 @app.route("/watchlist/add", methods=["POST"])
 @login_required
@@ -249,8 +262,60 @@ def d_friends():
 def d_settings():
     return render_template("settings.html", user={"username": "James"})
 
+@app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
+def review_episode(series_id, season_number, episode_number):
+    episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
+
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    episode = requests.get(episode_url, params=params).json()
+
+    return render_template("reviewepisode.html", episode=episode, series_id=series_id)
+
+@app.route("/series/<int:series_id>/season/<int:season_number>")
+def season_detail(series_id, season_number):
+    series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
+    season_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}"
+
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    series_response = requests.get(series_url, params=params)
+    season_response = requests.get(season_url, params=params)
+
+    series = series_response.json()
+    season = season_response.json()
+
+    return render_template("seasondetail.html", series=series, season=season, user=g.user)
+    
+
+
 if __name__ == "__main__":
     ## create tables if they do not exist
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+    
+@app.route("/series/<int:series_id>/season/<int:season_number>")
+def season_detail(series_id, season_number):
+    series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
+    season_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}"
+
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    series = requests.get(series_url, params=params).json()
+    season = requests.get(season_url, params=params).json()
+
+    return render_template(
+        "seasondetail.html",
+        series=series,
+        season=season
+    )

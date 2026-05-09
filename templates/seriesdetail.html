@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ series.name }}{% endblock %}
+
+{% block content %}
+
+<div class="series-detail-hero">
+
+  <div class="series-backdrop" style="
+    background-image: url('https://image.tmdb.org/t/p/original{{ series.backdrop_path }}');
+  "></div>
+
+  <div class="series-detail-content">
+
+    <img class="series-detail-poster"
+         src="https://image.tmdb.org/t/p/w342{{ series.poster_path }}"
+         alt="{{ series.name }} poster">
+
+    <div class="series-detail-info">
+      <h1>{{ series.name }}</h1>
+
+      <p class="series-meta">
+        {{ series.first_air_date[:4] if series.first_air_date }}
+        · {{ series.number_of_seasons }} seasons
+        · ⭐ {{ "%.1f"|format(series.vote_average) }}
+      </p>
+
+      <p class="series-overview">
+        {{ series.overview }}
+      </p>
+
+      <form action="/watchlist/add/{{ series.id }}" method="post">
+        <button class="btn-primary" type="submit">Add to Watchlist</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-header mt-4">
+  <span class="section-title">Seasons</span>
+</div>
+
+<div class="season-row">
+  {% for season in series.seasons %}
+    {% if season.season_number > 0 %}
+      <a class="season-card" href="/series/{{ series.id }}/season/{{ season.season_number }}">
+        {% if season.poster_path %}
+          <img src="https://image.tmdb.org/t/p/w185{{ season.poster_path }}" alt="{{ season.name }}">
+        {% endif %}
+
+        <div class="season-card-body">
+          <h3>{{ season.name }}</h3>
+          <p>{{ season.episode_count }} episodes</p>
+          <p>{{ season.air_date }}</p>
+        </div>
+      </a>
+    {% endif %}
+  {% endfor %}
+</div>
+
+{% endblock %}

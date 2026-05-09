@@ -50,7 +50,7 @@ function renderSeriesResults(seriesList) {
         : "N/A";
 
       html += `
-        <div class="card">
+         <a class="card series-card-link" href="/series/${series.id}">
           <div class="poster" style="
             background-image: ${posterUrl ? `url('${posterUrl}')` : "none"};
             background-size: cover;
@@ -74,7 +74,7 @@ function renderSeriesResults(seriesList) {
               Add to Watchlist
             </button>
           </div>
-        </div>
+        </a>
       `;
     });
   }
@@ -101,3 +101,14 @@ if (query) {
       }
     });
 }
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("add-watchlist-btn")) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const seriesId = e.target.dataset.seriesId;
+    console.log("Add to watchlist:", seriesId);
+
+    // Later: send this to Flask/database
+  }
+});

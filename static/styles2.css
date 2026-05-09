@@ -1096,3 +1096,142 @@ select,
 .topbar-right {
   margin-left: auto;
 }
+
+.series-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.series-card-link:hover {
+  transform: translateY(-4px);
+  transition: 0.2s ease;
+  cursor: pointer;
+}
+.series-detail-hero {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 420px;
+  border: 1px solid var(--border);
+  background: #111;
+}
+
+.series-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.25;
+}
+
+.series-detail-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 32px;
+  padding: 40px;
+  align-items: flex-end;
+}
+
+.series-detail-poster {
+  width: 230px;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+.series-detail-info {
+  max-width: 760px;
+}
+
+.series-detail-info h1 {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.series-meta {
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.series-overview {
+  line-height: 1.7;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.season-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 18px;
+}
+
+.season-card {
+  min-width: 190px;
+  max-width: 190px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--panel);
+  text-decoration: none;
+  color: inherit;
+}
+
+.season-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.season-card-body {
+  padding: 14px;
+}
+
+.season-card-body h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.season-card-body p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.episode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.episode-card {
+  display: flex;
+  gap: 20px;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.episode-img {
+  width: 240px;
+  height: 135px;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #222;
+}
+
+.episode-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.episode-body h3 {
+  margin-bottom: 8px;
+}
+
+.episode-meta {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
