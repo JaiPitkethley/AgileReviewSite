@@ -1,6 +1,27 @@
-<form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_dashboard') }}" method="get">
-  <span class="topbar-search-icon">&#9906;</span>
+<header class="topbar">
+  <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_dashboard') }}" method="get">
+    <span class="topbar-search-icon">&#9906;</span>
 
-  <input id="topbarSearchInput" name="q" type="text" placeholder="Search series, director, cast..." autocomplete="off"
-    value="{{ request.args.get('q', '') }}">
-</form>
+    <input
+      id="topbarSearchInput"
+      name="q"
+      type="text"
+      placeholder="Search series, director, cast..."
+      autocomplete="off"
+      value="{{ request.args.get('q', '') }}"
+    >
+  </form>
+
+  <div class="topbar-right">
+    <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
+
+    <button type="button" class="theme-toggle">
+      ☾ Dark
+    </button>
+
+    <button type="button" class="notif-btn">
+      ♡
+      <span class="notif-dot"></span>
+    </button>
+  </div>
+</header>

@@ -301,21 +301,3 @@ if __name__ == "__main__":
         db.create_all()
     app.run(debug=True)
     
-@app.route("/series/<int:series_id>/season/<int:season_number>")
-def season_detail(series_id, season_number):
-    series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
-    season_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}"
-
-    params = {
-        "api_key": TMDB_API_KEY,
-        "language": "en-US"
-    }
-
-    series = requests.get(series_url, params=params).json()
-    season = requests.get(season_url, params=params).json()
-
-    return render_template(
-        "seasondetail.html",
-        series=series,
-        season=season
-    )
