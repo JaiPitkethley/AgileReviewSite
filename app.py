@@ -221,46 +221,42 @@ def logout():
     flash("You have been signed out.", "success")
     return redirect(url_for("landing"))
 
-## dummy part for development, to be replaced with real user data and functionality later
-## Dashboard
-@app.route("/d/dashboard")
-def d_dashboard():
-    return render_template("reviewsitehome.html", user={"username": "James"})
+## Real logged-in pages
 
-## Profile
-@app.route("/d/profile")
-def d_profile():
-    return render_template("profile.html", user={"username": "James"})
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html", user=g.user)
 
-## My Library
-@app.route("/d/library")
-def d_library():
-    return render_template("library.html", user={"username": "James"})
 
-## Watchlist
-@app.route("/d/watchlist")
-def d_watchlist():
-    return render_template("watchlist.html", user={"username": "James"})
+@app.route("/library")
+@login_required
+def library():
+    return render_template("library.html", user=g.user)
 
-## Favourites
-@app.route("/d/favourites")
-def d_favourites():
-    return render_template("favourites.html", user={"username": "James"})
 
-## Community
-@app.route("/d/community")
-def d_community():
-    return render_template("community.html", user={"username": "James"})
+@app.route("/favourites")
+@login_required
+def favourites():
+    return render_template("favourites.html", user=g.user)
 
-## Friends
-@app.route("/d/friends")
-def d_friends():
-    return render_template("friends.html", user={"username": "James"})
 
-## Settings
-@app.route("/d/settings")
-def d_settings():
-    return render_template("settings.html", user={"username": "James"})
+@app.route("/community")
+@login_required
+def community():
+    return render_template("community.html", user=g.user)
+
+
+@app.route("/friends")
+@login_required
+def friends():
+    return render_template("friends.html", user=g.user)
+
+
+@app.route("/settings")
+@login_required
+def settings():
+    return render_template("settings.html", user=g.user)
 
 @app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
 def review_episode(series_id, season_number, episode_number):

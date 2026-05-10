@@ -9,14 +9,14 @@
   <div class="hero-accent-bar"></div>
 
   <div class="profile-avatar-xl">
-    {{ user["username"][:2] | upper }}
+    {{ g.user.username[:2] | upper }}
   </div>
 
   <div class="hero-text">
     <div class="profile-title-row">
-      <h2>{{ user["username"] }}</h2>
+      <h2>{{ g.user.username }}</h2>
 
-      <a href="{{ url_for('d_settings') }}" class="btn-ghost profile-small-btn">
+      <a href="{{ url_for('settings') }}" class="btn-ghost profile-small-btn">
         Edit profile
       </a>
 
@@ -29,8 +29,8 @@
     </p>
 
     <div class="hero-actions">
-      <a href="{{ url_for('d_library') }}" class="btn-primary">My library</a>
-      <a href="{{ url_for('d_watchlist') }}" class="btn-ghost">Watchlist</a>
+      <a href="{{ url_for('library') }}" class="btn-primary">My library</a>
+      <a href="{{ url_for('watchlist') }}" class="btn-ghost">Watchlist</a>
     </div>
   </div>
 
@@ -235,7 +235,7 @@
         Add favourites, manage your watchlist, write reviews, and customise your profile.
       </p>
 
-      <a href="{{ url_for('d_settings') }}" class="btn-primary profile-side-button">
+      <a href="{{ url_for('settings') }}" class="btn-primary profile-side-button">
         Customise profile
       </a>
     </section>

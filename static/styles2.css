@@ -1235,6 +1235,16 @@ select,
   color: var(--muted);
   margin-bottom: 12px;
 }
+
+.episode-body p {
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+.episode-body .btn-primary {
+  display: inline-block;
+  margin-top: 4px;
+}
 /* PROFILE PAGE - same aesthetic as dashboard/search pages */
 
 .profile-page-hero {

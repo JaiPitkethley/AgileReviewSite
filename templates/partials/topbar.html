@@ -1,5 +1,5 @@
 <header class="topbar">
-  <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_dashboard') }}" method="get">
+  <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('dashboard') }}" method="get">
     <span class="topbar-search-icon">&#9906;</span>
 
     <input
@@ -13,6 +13,10 @@
   </form>
 
   <div class="topbar-right">
+    {% if g.user %}
+      <span class="topbar-username">Hi, {{ g.user.username }}</span>
+    {% endif %}
+
     <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
 
     <button type="button" class="theme-toggle">
