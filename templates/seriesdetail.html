@@ -16,12 +16,33 @@
       alt="{{ series.name }} poster">
 
     <div class="series-detail-info">
-      <h1>{{ series.name }}</h1>
+
+      <h1>
+        {{ series.name }}
+
+        {% if series.genres %}
+        <span class="genre-bubble">{{ series.genres[0].name }}</span>
+        {% endif %}
+      </h1>
 
       <p class="series-meta">
-        {{ series.first_air_date[:4] if series.first_air_date }}
-        · {{ series.number_of_seasons }} seasons
-        · ⭐ {{ "%.1f"|format(series.vote_average) }}
+        <span class="meta-bubble">
+          {{ series.first_air_date[:4] if series.first_air_date }}
+        </span>
+
+        <span class="meta-bubble">
+          {{ series.number_of_seasons }} seasons
+        </span>
+
+        <span class="meta-bubble">
+          ⭐ {{ "%.1f"|format(series.vote_average) }}
+        </span>
+
+        {% if series.status %}
+        <span class="meta-bubble">
+          {{ series.status }}
+        </span>
+        {% endif %}
       </p>
 
       <p class="series-overview">

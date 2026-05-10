@@ -1,6 +1,29 @@
 const TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
+function getSavedSeriesIds() {
+  return JSON.parse(localStorage.getItem("savedSeriesIds")) || [];
+}
+
+function saveSeriesId(seriesId) {
+  const savedIds = getSavedSeriesIds();
+
+  if (!savedIds.includes(seriesId)) {
+    savedIds.push(seriesId);
+  }
+
+  localStorage.setItem("savedSeriesIds", JSON.stringify(savedIds));
+}
+
+function removeSeriesId(seriesId) {
+  const savedIds = getSavedSeriesIds().filter(id => id !== seriesId);
+  localStorage.setItem("savedSeriesIds", JSON.stringify(savedIds));
+}
+
+function isSeriesSaved(seriesId) {
+  return getSavedSeriesIds().includes(seriesId);
+}
+
 async function fetchSeries(query) {
   const url = `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
 
@@ -70,8 +93,11 @@ function renderSeriesResults(seriesList) {
               <div class="stars">⭐ ${rating}</div>
             </div>
 
-            <button class="btn-primary add-watchlist-btn" data-series-id="${series.id}">
-              Add to Watchlist
+            <button
+             class="btn-primary add-watchlist-btn"
+             data-series-id="${series.id}"
+            >
+              ${isSeriesSaved(String(series.id)) ? "Added" : "Add to Watchlist"}
             </button>
           </div>
         </a>
@@ -102,30 +128,44 @@ if (query) {
     });
 }
 document.addEventListener("click", async function (e) {
-  if (e.target.classList.contains("add-watchlist-btn")) {
-    e.preventDefault();
-    e.stopPropagation();
+  if (!e.target.classList.contains("add-watchlist-btn")) {
+    return;
+  }
 
-    const seriesId = e.target.dataset.seriesId;
+  e.preventDefault();
+  e.stopPropagation();
 
-    const formData = new FormData();
-    formData.append("tmdb_id", seriesId);
+  const button = e.target;
+  const seriesId = button.dataset.seriesId;
 
-    try {
-      const response = await fetch("/watchlist/add", {
-        method: "POST",
-        body: formData
-      });
+  const isAdded = button.textContent.trim() === "Added";
 
-      if (response.ok) {
-        e.target.textContent = "Added";
-        e.target.disabled = true;
-      } else {
-        alert("Could not add to watchlist.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong.");
+  const formData = new FormData();
+  formData.append("tmdb_id", seriesId);
+
+  const url = isAdded ? "/watchlist/remove" : "/watchlist/add";
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      alert("Could not update watchlist.");
+      return;
     }
+
+    if (isAdded) {
+      button.textContent = "Add to Watchlist";
+      removeSeriesId(seriesId);
+    } else {
+      button.textContent = "Added";
+      saveSeriesId(seriesId);
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong.");
   }
 });
