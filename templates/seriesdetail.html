@@ -49,10 +49,9 @@
         {{ series.overview }}
       </p>
 
-      <form action="/watchlist/add" method="POST">
-        <input type="hidden" name="tmdb_id" value="{{ series.id }}">
-        <button class="btn-primary" type="submit">Add to Watchlist</button>
-      </form>
+      <button class="btn-primary add-watchlist-btn" data-series-id="{{ series.id }}" type="button">
+        Add to Watchlist
+      </button>
     </div>
 
   </div>

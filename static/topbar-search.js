@@ -169,3 +169,16 @@ document.addEventListener("click", async function (e) {
     alert("Something went wrong.");
   }
 });
+function updateWatchlistButtonsOnPage() {
+  document.querySelectorAll(".add-watchlist-btn").forEach(button => {
+    const seriesId = button.dataset.seriesId;
+
+    if (isSeriesSaved(String(seriesId))) {
+      button.textContent = "Added";
+    } else {
+      button.textContent = "Add to Watchlist";
+    }
+  });
+}
+
+updateWatchlistButtonsOnPage();

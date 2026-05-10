@@ -1054,9 +1054,14 @@ select,
   width: 100%;
 }
 
-.add-watchlist-btn {
-  margin-top: 12px;
+.card .add-watchlist-btn {
   width: 100%;
+  margin-top: 8px;
+}
+.series-detail-info .add-watchlist-btn {
+  width: auto;
+  min-width: 200px;
+  margin-top: 18px;
 }
 
 /* Fix topbar search after global input styles */
