@@ -178,17 +178,17 @@ def add_to_watchlist():
     tmdb_id = request.form.get("tmdb_id")
 
     if not tmdb_id:
-        flash("Invalid show.", "error")
+        # flash("Invalid show.", "error")
         return redirect(request.referrer or url_for("dashboard"))
 
     try:
         entry = Watchlist(user_id=g.user.id, tmdb_id=int(tmdb_id))
         db.session.add(entry)
         db.session.commit()
-        flash("Added to your watchlist.", "success")
+        # flash("Added to your watchlist.", "success")
     except Exception:
         db.session.rollback()
-        flash("Already in your watchlist.", "info")
+        # flash("Already in your watchlist.", "info")
 
     return redirect(request.referrer or url_for("dashboard"))
 
@@ -200,7 +200,7 @@ def remove_from_watchlist():
     Watchlist.query.filter_by(user_id=g.user.id, tmdb_id=int(tmdb_id)).delete()
     db.session.commit()
 
-    flash("Removed from your watchlist.", "success")
+    # flash("Removed from your watchlist.", "success")
     return redirect(request.referrer or url_for("dashboard"))
 
 @app.route("/watchlist")
