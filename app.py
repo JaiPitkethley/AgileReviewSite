@@ -32,21 +32,34 @@ class User(db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
-    watchlist = db.relationship("Watchlist", backref="user", lazy=True)
+    series = db.relationship("UserSeries", backref="user", lazy=True)
 
-## Watchlist table
-class Watchlist(db.Model):
-    __tablename__ = "watchlist"
+class UserSeries(db.Model):
+    __tablename__ = "user_series"
 
     id = db.Column(db.Integer, primary_key=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     tmdb_id = db.Column(db.Integer, nullable=False)
+
+    name = db.Column(db.String(200), nullable=False)
+    poster_path = db.Column(db.String(300), nullable=True)
+    vote_average = db.Column(db.Float, nullable=True)
+
+    # Stores genres as text like: "Comedy, Drama, Sci-Fi"
+    genres = db.Column(db.String(300), nullable=True)
+
+    # Main status system
+    # watchlist, watching, completed, on_hold, dropped
+    status = db.Column(db.String(30), nullable=False, default="watchlist")
+
+    priority = db.Column(db.Boolean, default=False)
+
     added_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
     __table_args__ = (
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
-
 
 TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
 TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
@@ -57,7 +70,67 @@ def get_show_details(tmdb_id):
     response = requests.get(url)
     data = response.json()
     return data
+def get_genre_stats(shows):
+    stats = {}
 
+    for show in shows:
+        if not show.genres:
+            continue
+
+def get_first_genre(show):
+    if not show.genres:
+        return None
+
+    return show.genres.split(",")[0].strip()
+
+
+def get_genre_stats(shows):
+    stats = {}
+
+    for show in shows:
+        genre = get_first_genre(show)
+
+        if genre:
+            stats[genre] = stats.get(genre, 0) + 1
+
+    return dict(sorted(stats.items(), key=lambda item: item[1], reverse=True))
+
+
+def get_status_genre_stats(shows):
+    stats = {}
+
+    for show in shows:
+        status = show.status
+
+        if status not in stats:
+            stats[status] = {}
+
+        genre = get_first_genre(show)
+
+        if genre:
+            stats[status][genre] = stats[status].get(genre, 0) + 1
+
+    return stats
+
+    return dict(sorted(stats.items(), key=lambda item: item[1], reverse=True))
+
+
+def get_status_genre_stats(shows):
+    stats = {}
+
+    for show in shows:
+        status = show.status
+
+        if status not in stats:
+            stats[status] = {}
+
+        if show.genres:
+            first_genere = show.genres.split(",")[0].strip()
+
+            if first_genere:
+                stats[status][first_genere] = stats[status].get(first_genere, 0) + 1
+
+    return stats
 
 ## load logged in user
 @app.before_request
@@ -178,21 +251,51 @@ def add_to_watchlist():
     tmdb_id = request.form.get("tmdb_id")
 
     if not tmdb_id:
-        # flash("Invalid show.", "error")
         return redirect(request.referrer or url_for("dashboard"))
 
-    try:
-        entry = Watchlist(user_id=g.user.id, tmdb_id=int(tmdb_id))
-        db.session.add(entry)
+    tmdb_id = int(tmdb_id)
+
+    existing = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id
+    ).first()
+
+    if existing:
+        existing.status = "watchlist"
         db.session.commit()
-        # flash("Added to your watchlist.", "success")
-    except Exception:
-        db.session.rollback()
-        # flash("Already in your watchlist.", "info")
+        return redirect(request.referrer or url_for("watchlist"))
 
-    return redirect(request.referrer or url_for("dashboard"))
+    show = get_show_details(tmdb_id)
 
-@app.route("/watchlist/remove", methods=["POST"])
+    genre_names = []
+    for genre in show.get("genres", []):
+        genre_names.append(genre.get("name"))
+
+    entry = UserSeries(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id,
+        name=show.get("name", "Unknown Series"),
+        poster_path=show.get("poster_path"),
+        vote_average=show.get("vote_average"),
+        genres=", ".join(genre_names),
+        status="watchlist"
+    )
+
+    db.session.add(entry)
+    db.session.commit()
+
+    return redirect(request.referrer or url_for("watchlist"))
+def remove_from_watchlist():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if tmdb_id:
+        UserSeries.query.filter_by(
+            user_id=g.user.id,
+            tmdb_id=int(tmdb_id)
+        ).delete()
+        db.session.commit()
+
+    return redirect(request.referrer or url_for("watchlist"))
 @login_required
 def remove_from_watchlist():
     tmdb_id = request.form.get("tmdb_id")
@@ -202,19 +305,44 @@ def remove_from_watchlist():
 
     # flash("Removed from your watchlist.", "success")
     return redirect(request.referrer or url_for("dashboard"))
+@app.route("/series/status", methods=["POST"])
+@login_required
+def update_series_status():
+    tmdb_id = request.form.get("tmdb_id")
+    status = request.form.get("status")
 
+    allowed_statuses = ["watchlist", "watching", "completed", "on_hold", "dropped"]
+
+    if not tmdb_id or status not in allowed_statuses:
+        return redirect(request.referrer or url_for("library"))
+
+    item = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=int(tmdb_id)
+    ).first()
+
+    if item:
+        item.status = status
+        db.session.commit()
+
+    return redirect(request.referrer or url_for("library"))
 @app.route("/watchlist")
 @login_required
 def watchlist():
-    items = Watchlist.query.filter_by(user_id=g.user.id).all()
+    shows = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watchlist"
+    ).all()
 
-    shows = []
-    for item in items:
-        show = get_show_details(item.tmdb_id)
-        shows.append(show)
+    genre_stats = get_genre_stats(shows)
 
-    return render_template("watchlist.html", shows=shows, user=g.user)
-
+    return render_template(
+        "watchlist.html",
+        shows=shows,
+        user=g.user,
+        genre_stats=genre_stats
+    )
+    
 @app.route("/logout")
 def logout():
     session.clear()
@@ -232,7 +360,32 @@ def profile():
 @app.route("/library")
 @login_required
 def library():
-    return render_template("library.html", user=g.user)
+    shows = UserSeries.query.filter(
+        UserSeries.user_id == g.user.id,
+        UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+    ).all()
+
+    total_series = len(shows)
+    completed_count = sum(1 for show in shows if show.status == "completed")
+    watching_count = sum(1 for show in shows if show.status == "watching")
+    dropped_count = sum(1 for show in shows if show.status == "dropped")
+    on_hold_count = sum(1 for show in shows if show.status == "on_hold")
+
+    genre_stats = get_genre_stats(shows)
+    status_genre_stats = get_status_genre_stats(shows)
+
+    return render_template(
+        "library.html",
+        user=g.user,
+        shows=shows,
+        total_series=total_series,
+        completed_count=completed_count,
+        watching_count=watching_count,
+        dropped_count=dropped_count,
+        on_hold_count=on_hold_count,
+        genre_stats=genre_stats,
+        status_genre_stats=status_genre_stats
+    )
 
 
 @app.route("/favourites")

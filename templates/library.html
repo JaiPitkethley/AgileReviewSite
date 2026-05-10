@@ -6,38 +6,52 @@
 
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
+
   <div class="hero-text">
-    <h2>{{ user["username"] }}'s Library</h2>
+    <h2>{{ user.username }}'s Library</h2>
     <p>Your complete tracked collection of series, organized by progress and genre.</p>
+
     <div class="hero-actions">
-      <button class="btn-primary">Continue watching</button>
-      <button class="btn-ghost">Browse new series</button>
+      <a href="/watchlist" class="btn-primary">Add from watchlist</a>
+      <a href="/dashboard" class="btn-ghost">Browse new series</a>
     </div>
   </div>
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">58</div>
+      <div class="hero-stat-n">{{ total_series }}</div>
       <div class="hero-stat-l">Series</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">47</div>
-      <div class="hero-stat-l">Finished</div>
+      <div class="hero-stat-n">{{ completed_count }}</div>
+      <div class="hero-stat-l">Completed</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">312</div>
-      <div class="hero-stat-l">Episodes</div>
+      <div class="hero-stat-n">{{ watching_count }}</div>
+      <div class="hero-stat-l">Watching</div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ on_hold_count }}</div>
+      <div class="hero-stat-l">On Hold</div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ dropped_count }}</div>
+      <div class="hero-stat-l">Dropped</div>
     </div>
   </div>
 </div>
 
 <div class="filter-row">
   <span class="filter-label">Filter</span>
-  <div class="chip active" onclick="toggleChip(this)">All</div>
-  <div class="chip" onclick="toggleChip(this)">Watching</div>
-  <div class="chip" onclick="toggleChip(this)">Completed</div>
-  <div class="chip" onclick="toggleChip(this)">On Hold</div>
-  <div class="chip" onclick="toggleChip(this)">Dropped</div>
+  <div class="chip active" onclick="filterLibraryStatus(this)">All</div>
+  <div class="chip" onclick="filterLibraryStatus(this)">Watching</div>
+  <div class="chip" onclick="filterLibraryStatus(this)">Completed</div>
+  <div class="chip" onclick="filterLibraryStatus(this)">On Hold</div>
+  <div class="chip" onclick="filterLibraryStatus(this)">Dropped</div>
 </div>
 
 <div class="section-header mt-4">
@@ -47,88 +61,147 @@
 
 <div class="card-grid">
 
-  <div class="card">
-    <div class="poster p1">
-      S
-      <span class="badge badge-watching">Watching</span>
+  {% if shows %}
+  {% for show in shows %}
+
+  <div class="card library-card status-{{ show.status }}">
+
+    <div class="status-notch">
+      {{ show.status.replace('_', ' ').title() }}
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:70%"></div>
-    </div>
+
+    <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');"></div>
+    </a>
+
     <div class="card-body">
-      <div class="card-title">Severance</div>
+      <div class="card-title">{{ show.name }}</div>
+
       <div class="card-sub">
-        Apple TV+
-        <div class="stars">★★★★★</div>
+        {% if show.genres %}
+          {{ show.genres.split(',')[0] }}
+        {% else %}
+          No genre
+        {% endif %}
+
+        <div class="stars">⭐ {{ show.vote_average }}</div>
       </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="
+          width:
+          {% if show.status == 'completed' %}100%
+          {% elif show.status == 'watching' %}50%
+          {% elif show.status == 'on_hold' %}30%
+          {% else %}0%
+          {% endif %}
+        "></div>
+      </div>
+
+      <form action="/series/status" method="POST" class="status-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <select name="status" class="status-select" onchange="this.form.submit()">
+          <option value="watching" {% if show.status == 'watching' %}selected{% endif %}>
+            Watching
+          </option>
+
+          <option value="completed" {% if show.status == 'completed' %}selected{% endif %}>
+            Completed
+          </option>
+
+          <option value="on_hold" {% if show.status == 'on_hold' %}selected{% endif %}>
+            On Hold
+          </option>
+
+          <option value="dropped" {% if show.status == 'dropped' %}selected{% endif %}>
+            Dropped
+          </option>
+
+          <option value="watchlist" {% if show.status == 'watchlist' %}selected{% endif %}>
+            Move to Watchlist
+          </option>
+        </select>
+      </form>
+
+      <form action="/watchlist/remove" method="POST" class="remove-watchlist-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+        <button class="btn-ghost" type="submit">Remove</button>
+      </form>
     </div>
+
   </div>
 
-  <div class="card">
-    <div class="poster p2">
-      T
-      <span class="badge badge-watching">Watching</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:30%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">The Bear</div>
-      <div class="card-sub">
-        Hulu
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
+  {% endfor %}
+  {% else %}
+    <p style="padding: 20px; font-size: 1.2rem;">Your library is empty.</p>
+  {% endif %}
+
+</div>
+
+<div class="library-insights-grid">
+
+  <div class="library-insight-card">
+    <span class="section-title">Genre Breakdown</span>
+
+    {% if genre_stats %}
+      {% for genre, count in genre_stats.items() %}
+        <div class="stat-line">
+          <span>{{ genre }}</span>
+          <strong>{{ count }}</strong>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-text">No genre data yet.</p>
+    {% endif %}
   </div>
 
-  <div class="card">
-    <div class="poster p5">
-      W
-      <span class="badge badge-finished">Finished</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">White Lotus</div>
-      <div class="card-sub">
-        HBO
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+  <div class="library-insight-card">
+    <span class="section-title">Status by Genre</span>
 
-  <div class="card">
-    <div class="poster p3">B</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Black Mirror</div>
-      <div class="card-sub">
-        Netflix
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
+    {% if status_genre_stats %}
+      {% for status, genres in status_genre_stats.items() %}
+        <div class="status-genre-block">
+          <h3>{{ status.replace('_', ' ').title() }}</h3>
 
-  <div class="card">
-    <div class="poster p4">
-      A
-      <span class="badge badge-new">New</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Andor S2</div>
-      <div class="card-sub">
-        Disney+
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
+          {% for genre, count in genres.items() %}
+            <div class="stat-line">
+              <span>{{ genre }}</span>
+              <strong>{{ count }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-text">No status data yet.</p>
+    {% endif %}
   </div>
 
 </div>
+
+<script>
+  function filterLibraryStatus(clickedChip) {
+    const filterRow = clickedChip.closest(".filter-row");
+    const chips = filterRow.querySelectorAll(".chip");
+
+    chips.forEach(chip => chip.classList.remove("active"));
+    clickedChip.classList.add("active");
+
+    const filterText = clickedChip.textContent.trim().toLowerCase();
+    const selectedStatus = filterText.replace(/\s+/g, "_");
+
+    const cards = document.querySelectorAll(".library-card");
+
+    cards.forEach(card => {
+      if (selectedStatus === "all") {
+        card.style.display = "";
+      } else if (card.classList.contains("status-" + selectedStatus)) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+</script>
 
 {% endblock %}
