@@ -745,6 +745,9 @@ a {
   font-size: 38px;
   color: rgba(255, 255, 255, 0.35);
   position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .p1 {

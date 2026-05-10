@@ -101,14 +101,31 @@ if (query) {
       }
     });
 }
-document.addEventListener("click", function (e) {
+document.addEventListener("click", async function (e) {
   if (e.target.classList.contains("add-watchlist-btn")) {
     e.preventDefault();
     e.stopPropagation();
 
     const seriesId = e.target.dataset.seriesId;
-    console.log("Add to watchlist:", seriesId);
 
-    // Later: send this to Flask/database
+    const formData = new FormData();
+    formData.append("tmdb_id", seriesId);
+
+    try {
+      const response = await fetch("/watchlist/add", {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        e.target.textContent = "Added";
+        e.target.disabled = true;
+      } else {
+        alert("Could not add to watchlist.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
   }
 });
