@@ -12,24 +12,45 @@
 
   <div class="series-detail-content">
 
-    <img class="series-detail-poster"
-         src="https://image.tmdb.org/t/p/w342{{ series.poster_path }}"
-         alt="{{ series.name }} poster">
+    <img class="series-detail-poster" src="https://image.tmdb.org/t/p/w342{{ series.poster_path }}"
+      alt="{{ series.name }} poster">
 
     <div class="series-detail-info">
-      <h1>{{ series.name }}</h1>
+
+      <h1>
+        {{ series.name }}
+
+        {% if series.genres %}
+        <span class="genre-bubble">{{ series.genres[0].name }}</span>
+        {% endif %}
+      </h1>
 
       <p class="series-meta">
-        {{ series.first_air_date[:4] if series.first_air_date }}
-        · {{ series.number_of_seasons }} seasons
-        · ⭐ {{ "%.1f"|format(series.vote_average) }}
+        <span class="meta-bubble">
+          {{ series.first_air_date[:4] if series.first_air_date }}
+        </span>
+
+        <span class="meta-bubble">
+          {{ series.number_of_seasons }} seasons
+        </span>
+
+        <span class="meta-bubble">
+          ⭐ {{ "%.1f"|format(series.vote_average) }}
+        </span>
+
+        {% if series.status %}
+        <span class="meta-bubble">
+          {{ series.status }}
+        </span>
+        {% endif %}
       </p>
 
       <p class="series-overview">
         {{ series.overview }}
       </p>
 
-      <form action="/watchlist/add/{{ series.id }}" method="post">
+      <form action="/watchlist/add" method="POST">
+        <input type="hidden" name="tmdb_id" value="{{ series.id }}">
         <button class="btn-primary" type="submit">Add to Watchlist</button>
       </form>
     </div>
@@ -43,19 +64,19 @@
 
 <div class="season-row">
   {% for season in series.seasons %}
-    {% if season.season_number > 0 %}
-      <a class="season-card" href="/series/{{ series.id }}/season/{{ season.season_number }}">
-        {% if season.poster_path %}
-          <img src="https://image.tmdb.org/t/p/w185{{ season.poster_path }}" alt="{{ season.name }}">
-        {% endif %}
-
-        <div class="season-card-body">
-          <h3>{{ season.name }}</h3>
-          <p>{{ season.episode_count }} episodes</p>
-          <p>{{ season.air_date }}</p>
-        </div>
-      </a>
+  {% if season.season_number > 0 %}
+  <a class="season-card" href="/series/{{ series.id }}/season/{{ season.season_number }}">
+    {% if season.poster_path %}
+    <img src="https://image.tmdb.org/t/p/w185{{ season.poster_path }}" alt="{{ season.name }}">
     {% endif %}
+
+    <div class="season-card-body">
+      <h3>{{ season.name }}</h3>
+      <p>{{ season.episode_count }} episodes</p>
+      <p>{{ season.air_date }}</p>
+    </div>
+  </a>
+  {% endif %}
   {% endfor %}
 </div>
 
