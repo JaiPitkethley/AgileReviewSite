@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Review {{ episode.name }}{% endblock %}
+
+{% block content %}
+
+<div class="section-header">
+  <span class="section-title">Review Episode</span>
+</div>
+
+<div class="episode-card">
+
+  {% if episode.still_path %}
+    <img class="episode-img"
+         src="https://image.tmdb.org/t/p/w300{{ episode.still_path }}"
+         alt="{{ episode.name }}">
+  {% endif %}
+
+  <div class="episode-body">
+    <h2>{{ episode.name }}</h2>
+    <p class="episode-meta">
+      Season {{ episode.season_number }},
+      Episode {{ episode.episode_number }}
+    </p>
+
+    <p>{{ episode.overview }}</p>
+  </div>
+
+</div>
+
+<form class="review-form" method="post" action="/reviews/add">
+  <input type="hidden" name="series_id" value="{{ series_id }}">
+  <input type="hidden" name="season_number" value="{{ episode.season_number }}">
+  <input type="hidden" name="episode_number" value="{{ episode.episode_number }}">
+  <input type="hidden" name="episode_name" value="{{ episode.name }}">
+
+  <label>Rating</label>
+  <select name="rating">
+    <option value="5">5 stars</option>
+    <option value="4">4 stars</option>
+    <option value="3">3 stars</option>
+    <option value="2">2 stars</option>
+    <option value="1">1 star</option>
+  </select>
+
+  <label>Your review</label>
+  <textarea name="review_text" rows="6" placeholder="Write your thoughts..."></textarea>
+
+  <button class="btn-primary" type="submit">Save Review</button>
+</form>
+
+{% endblock %}

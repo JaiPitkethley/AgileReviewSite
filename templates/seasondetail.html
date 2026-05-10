@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{{ series.name }} - {{ season.name }}{% endblock %}
+
+{% block content %}
+
+<div class="section-header">
+  <span class="section-title">{{ series.name }} — {{ season.name }}</span>
+</div>
+
+<p class="series-overview">
+  {{ season.overview }}
+</p>
+
+<div class="episode-list">
+
+  {% for episode in season.episodes %}
+    <div class="episode-card">
+
+      {% if episode.still_path %}
+        <img class="episode-img"
+             src="https://image.tmdb.org/t/p/w300{{ episode.still_path }}"
+             alt="{{ episode.name }}">
+      {% else %}
+        <div class="episode-img episode-placeholder">No Image</div>
+      {% endif %}
+
+      <div class="episode-body">
+        <h3>
+          Episode {{ episode.episode_number }}: {{ episode.name }}
+        </h3>
+
+        <p class="episode-meta">
+          {{ episode.air_date }} · ⭐ {{ "%.1f"|format(episode.vote_average) }}
+        </p>
+
+        <p>
+          {{ episode.overview }}
+        </p>
+
+        <a class="btn-primary"
+           href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
+          Review Episode
+        </a>
+      </div>
+
+    </div>
+  {% endfor %}
+
+</div>
+
+{% endblock %}
