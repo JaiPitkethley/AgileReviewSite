@@ -1,6 +1,12 @@
-<form id="topbarSearchForm" class="topbar-search" action="{{ url_for('d_dashboard') }}" method="get">
+<form id="topbarSearchForm" class="topbar-search" action="{{ url_for('dashboard') }}" method="get">
   <span class="topbar-search-icon">&#9906;</span>
 
-  <input id="topbarSearchInput" name="q" type="text" placeholder="Search series, director, cast..." autocomplete="off"
-    value="{{ request.args.get('q', '') }}">
+  <input
+    id="topbarSearchInput"
+    name="q"
+    type="text"
+    placeholder="Search series, director, cast..."
+    autocomplete="off"
+    value="{{ request.args.get('q', '') }}"
+  >
 </form>

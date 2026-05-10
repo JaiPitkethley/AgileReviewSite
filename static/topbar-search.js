@@ -1,10 +1,7 @@
-const TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
 async function fetchSeries(query) {
-  const url = `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
-
-  const response = await fetch(url);
+  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch TV series");
@@ -70,9 +67,12 @@ function renderSeriesResults(seriesList) {
               <div class="stars">⭐ ${rating}</div>
             </div>
 
-            <button class="btn-primary add-watchlist-btn" data-series-id="${series.id}">
-              Add to Watchlist
-            </button>
+            <form action="/watchlist/add" method="post">
+              <input type="hidden" name="tmdb_id" value="${series.id}">
+              <button type="submit" class="btn-primary add-watchlist-btn">
+                Add to Watchlist
+              </button>
+            </form>
           </div>
         </div>
       `;
@@ -83,6 +83,7 @@ function renderSeriesResults(seriesList) {
 
   discoverContent.innerHTML = html;
 }
+
 const params = new URLSearchParams(window.location.search);
 const query = params.get("q");
 
@@ -94,10 +95,10 @@ if (query) {
     .catch(error => {
       console.error(error);
 
-      const grid = document.getElementById("topbarSearchResults");
+      const discoverContent = document.getElementById("discoverContent");
 
-      if (grid) {
-        grid.innerHTML = "<p>Something went wrong. Please try again.</p>";
+      if (discoverContent) {
+        discoverContent.innerHTML = "<p>Something went wrong. Please try again.</p>";
       }
     });
 }

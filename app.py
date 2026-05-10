@@ -2,10 +2,10 @@ from datetime import timedelta
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-## database + API imports
+# database + API imports
 from flask_sqlalchemy import SQLAlchemy
 import requests
 
@@ -16,13 +16,14 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "change-this-before-sharing"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 
-## SQLAlchemy configuration (SQLite file stored locally)
+# SQLAlchemy configuration (SQLite file stored locally)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(DATABASE)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-## Users table
+
+# Users table
 class User(db.Model):
     __tablename__ = "users"
 
@@ -34,7 +35,8 @@ class User(db.Model):
 
     watchlist = db.relationship("Watchlist", backref="user", lazy=True)
 
-## Watchlist table
+
+# Watchlist table
 class Watchlist(db.Model):
     __tablename__ = "watchlist"
 
@@ -47,18 +49,40 @@ class Watchlist(db.Model):
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
 
-#here is where our api keys will go, make sure not to push the real ones
+
+# here is where our api keys will go, make sure not to push the real ones
 TMDB_API_KEY = "key goes here"
 TMDB_READ_TOKEN = "read token goes here"
 
+
 def get_show_details(tmdb_id):
-    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={TMDB_API_KEY}"
-    response = requests.get(url)
+    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def search_tv_series(query):
+    url = "https://api.themoviedb.org/3/search/tv"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "query": query,
+        "include_adult": "false",
+        "language": "en-US",
+        "page": 1
+    }
+
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
     data = response.json()
-    return data
+    return data.get("results", [])
 
 
-## load logged in user
+# load logged in user
 @app.before_request
 def load_logged_in_user():
     user_id = session.get("user_id")
@@ -66,9 +90,14 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = User.query.with_entities(User.id, User.username, User.email).filter_by(id=user_id).first()
+        g.user = User.query.with_entities(
+            User.id,
+            User.username,
+            User.email
+        ).filter_by(id=user_id).first()
 
-## login required decorator
+
+# login required decorator
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
@@ -78,9 +107,11 @@ def login_required(view):
         return view(*args, **kwargs)
     return wrapped_view
 
+
 @app.route("/")
 def index():
     return redirect(url_for("landing"))
+
 
 @app.route("/landing")
 def landing():
@@ -88,6 +119,7 @@ def landing():
     if g.user is not None:
         prefill_email = g.user.email
     return render_template("landing.html", prefill_email=prefill_email)
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -126,6 +158,7 @@ def signup():
 
     return render_template("signup.html", prefill_email=prefill_email)
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if g.user is not None:
@@ -154,10 +187,27 @@ def login():
 
     return render_template("login.html")
 
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
     return render_template("reviewsitehome.html", user=g.user)
+
+
+@app.route("/api/search")
+@login_required
+def api_search():
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        return jsonify({"results": []})
+
+    try:
+        results = search_tv_series(query)
+        return jsonify({"results": results})
+    except requests.RequestException:
+        return jsonify({"results": [], "error": "Failed to fetch search results"}), 500
+
 
 @app.route("/watchlist/add", methods=["POST"])
 @login_required
@@ -179,16 +229,22 @@ def add_to_watchlist():
 
     return redirect(request.referrer or url_for("dashboard"))
 
+
 @app.route("/watchlist/remove", methods=["POST"])
 @login_required
 def remove_from_watchlist():
     tmdb_id = request.form.get("tmdb_id")
 
+    if not tmdb_id:
+        flash("Invalid show.", "error")
+        return redirect(request.referrer or url_for("watchlist"))
+
     Watchlist.query.filter_by(user_id=g.user.id, tmdb_id=int(tmdb_id)).delete()
     db.session.commit()
 
     flash("Removed from your watchlist.", "success")
-    return redirect(request.referrer or url_for("dashboard"))
+    return redirect(request.referrer or url_for("watchlist"))
+
 
 @app.route("/watchlist")
 @login_required
@@ -197,10 +253,14 @@ def watchlist():
 
     shows = []
     for item in items:
-        show = get_show_details(item.tmdb_id)
-        shows.append(show)
+        try:
+            show = get_show_details(item.tmdb_id)
+            shows.append(show)
+        except requests.RequestException:
+            continue
 
     return render_template("watchlist.html", shows=shows, user=g.user)
+
 
 @app.route("/logout")
 def logout():
@@ -208,49 +268,58 @@ def logout():
     flash("You have been signed out.", "success")
     return redirect(url_for("landing"))
 
-## dummy part for development, to be replaced with real user data and functionality later
-## Dashboard
+
+# dummy part for development, to be replaced with real user data and functionality later
+# Dashboard
 @app.route("/d/dashboard")
 def d_dashboard():
     return render_template("reviewsitehome.html", user={"username": "James"})
 
-## Profile
+
+# Profile
 @app.route("/d/profile")
 def d_profile():
     return render_template("profile.html", user={"username": "James"})
 
-## My Library
+
+# My Library
 @app.route("/d/library")
 def d_library():
     return render_template("library.html", user={"username": "James"})
 
-## Watchlist
+
+# Watchlist
 @app.route("/d/watchlist")
 def d_watchlist():
     return render_template("watchlist.html", user={"username": "James"})
 
-## Favourites
+
+# Favourites
 @app.route("/d/favourites")
 def d_favourites():
     return render_template("favourites.html", user={"username": "James"})
 
-## Community
+
+# Community
 @app.route("/d/community")
 def d_community():
     return render_template("community.html", user={"username": "James"})
 
-## Friends
+
+# Friends
 @app.route("/d/friends")
 def d_friends():
     return render_template("friends.html", user={"username": "James"})
 
-## Settings
+
+# Settings
 @app.route("/d/settings")
 def d_settings():
     return render_template("settings.html", user={"username": "James"})
 
+
 if __name__ == "__main__":
-    ## create tables if they do not exist
+    # create tables if they do not exist
     with app.app_context():
         db.create_all()
     app.run(debug=True)
