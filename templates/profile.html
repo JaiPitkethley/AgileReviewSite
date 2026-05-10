@@ -1,187 +1,247 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Profile{% endblock %}
 
 {% block content %}
 
 <!-- Profile Hero -->
-<div class="hero-banner profile-hero">
+<div class="hero-banner profile-page-hero">
   <div class="hero-accent-bar"></div>
 
-  <div class="profile-avatar-xl">JL</div>
+  <div class="profile-avatar-xl">
+    {{ g.user.username[:2] | upper }}
+  </div>
 
   <div class="hero-text">
-    <h2>Jamie Lee</h2>
-    <p>Pro account · Drama, Sci-Fi & Thriller fan. Tracking 58 series, 12 watchlist items, and 19 reviews.</p>
+    <div class="profile-title-row">
+      <h2>{{ g.user.username }}</h2>
+
+      <a href="{{ url_for('settings') }}" class="btn-ghost profile-small-btn">
+        Edit profile
+      </a>
+
+      <button class="profile-circle-btn" type="button">•••</button>
+    </div>
+
+    <p>
+      Your series profile. Track favourites, reviews, watchlist progress,
+      recent activity, and your watching stats.
+    </p>
 
     <div class="hero-actions">
-      <button class="btn-primary">Edit profile</button>
-      <button class="btn-ghost">Log out</button>
+      <a href="{{ url_for('library') }}" class="btn-primary">My library</a>
+      <a href="{{ url_for('watchlist') }}" class="btn-ghost">Watchlist</a>
     </div>
   </div>
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">58</div>
-      <div class="hero-stat-l">Library</div>
+      <div class="hero-stat-n">47</div>
+      <div class="hero-stat-l">Finished</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">12</div>
-      <div class="hero-stat-l">Watchlist</div>
+      <div class="hero-stat-n">8</div>
+      <div class="hero-stat-l">Watching</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">19</div>
-      <div class="hero-stat-l">Reviews</div>
+      <div class="hero-stat-n">312</div>
+      <div class="hero-stat-l">Episodes</div>
     </div>
   </div>
 </div>
+
 
 <!-- Profile Tabs -->
-<div class="filter-row">
+<div class="filter-row profile-filter-row">
   <span class="filter-label">Profile</span>
+
   <div class="chip active">Overview</div>
+  <div class="chip">Activity</div>
+  <div class="chip">Series</div>
+  <div class="chip">Diary</div>
   <div class="chip">Reviews</div>
   <div class="chip">Watchlist</div>
-  <div class="chip">Friends</div>
+  <div class="chip">Lists</div>
+  <div class="chip">Likes</div>
+  <div class="chip">Network</div>
 </div>
 
-<div class="two-col">
 
-  <!-- Watching Progress -->
-  <div>
-    <div class="section-header">
-      <span class="section-title">Watching progress</span>
-      <span class="see-all">View all</span>
-    </div>
+<!-- Main Profile Layout -->
+<div class="profile-dashboard-grid">
 
-    <div class="continue-list">
-      <div class="continue-item">
-        <div class="ci-poster p1">S</div>
-        <div class="ci-body">
-          <div class="ci-title">Severance</div>
-          <div class="ci-sub">S2 · Ep 7 — Woe's Hollow</div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-fill" style="width:70%"></div>
+  <!-- Main Column -->
+  <div class="profile-main">
+
+    <!-- Favourite Series -->
+    <section class="profile-block">
+      <div class="section-header">
+        <span class="section-title">Favourite series</span>
+        <span class="see-all">Edit</span>
+      </div>
+
+      <div class="profile-favourites-grid">
+        <div class="profile-empty-favourite">
+          <span>+</span>
+          <p>Add favourite</p>
+        </div>
+
+        <div class="profile-empty-favourite">
+          <span>+</span>
+          <p>Add favourite</p>
+        </div>
+
+        <div class="profile-empty-favourite">
+          <span>+</span>
+          <p>Add favourite</p>
+        </div>
+
+        <div class="profile-empty-favourite">
+          <span>+</span>
+          <p>Add favourite</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Recent Activity -->
+    <section class="profile-block">
+      <div class="section-header">
+        <span class="section-title">Recent activity</span>
+        <span class="see-all">View all</span>
+      </div>
+
+      <div class="continue-list">
+        <div class="continue-item">
+          <div class="ci-poster p1">G</div>
+
+          <div class="ci-body">
+            <div class="ci-title">Started watching Ghosts</div>
+            <div class="ci-sub">Season 1 · Episode 1</div>
+
+            <div class="ci-bar">
+              <div class="ci-track">
+                <div class="ci-fill" style="width: 20%"></div>
+              </div>
+              <span class="ci-pct">20%</span>
             </div>
-            <span class="ci-pct">70%</span>
+          </div>
+
+          <span class="badge badge-watching">Watching</span>
+        </div>
+
+        <div class="continue-item">
+          <div class="ci-poster p3">R</div>
+
+          <div class="ci-body">
+            <div class="ci-title">Reviewed a recent episode</div>
+            <div class="stars">★★★★☆</div>
+            <div class="ci-sub">Good pacing and funny character moments.</div>
+          </div>
+
+          <span class="badge badge-finished">Reviewed</span>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Recent Reviews -->
+    <section class="profile-block">
+      <div class="section-header">
+        <span class="section-title">Recent reviews</span>
+        <span class="see-all">View all</span>
+      </div>
+
+      <div class="card-grid profile-review-grid">
+        <div class="card">
+          <div class="poster p2">S</div>
+          <div class="card-body">
+            <div class="card-title">Severance</div>
+            <div class="card-sub">2025</div>
+            <div class="stars">★★★★★</div>
           </div>
         </div>
-        <span class="badge badge-watching">Watching</span>
-      </div>
 
-      <div class="continue-item">
-        <div class="ci-poster p2">T</div>
-        <div class="ci-body">
-          <div class="ci-title">The Bear</div>
-          <div class="ci-sub">S3 · Ep 3 — Doors</div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-fill" style="width:30%"></div>
-            </div>
-            <span class="ci-pct">30%</span>
+        <div class="card">
+          <div class="poster p4">T</div>
+          <div class="card-body">
+            <div class="card-title">The Bear</div>
+            <div class="card-sub">2024</div>
+            <div class="stars">★★★★☆</div>
           </div>
         </div>
-        <span class="badge badge-watching">Watching</span>
+
+        <div class="card">
+          <div class="poster p5">G</div>
+          <div class="card-body">
+            <div class="card-title">Ghosts</div>
+            <div class="card-sub">2021</div>
+            <div class="stars">★★★★☆</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
   </div>
 
-  <!-- Genre Breakdown -->
-  <div>
-    <div class="section-header">
-      <span class="section-title">Genre breakdown</span>
-    </div>
 
-    <div class="profile-panel">
-      <div class="genre-row">
-        <span>Drama</span>
-        <div class="ci-track">
-          <div class="ci-fill" style="width:32%"></div>
-        </div>
-        <strong>32%</strong>
+  <!-- Side Column -->
+  <aside class="profile-side">
+
+    <section class="profile-side-card">
+      <div class="section-header">
+        <span class="section-title">Activity</span>
       </div>
 
-      <div class="genre-row">
-        <span>Sci-Fi</span>
-        <div class="ci-track">
-          <div class="ci-fill" style="width:24%"></div>
-        </div>
-        <strong>24%</strong>
+      <p class="profile-muted-text">No new notifications.</p>
+    </section>
+
+
+    <section class="profile-side-card">
+      <div class="section-header">
+        <span class="section-title">Stats</span>
       </div>
 
-      <div class="genre-row">
-        <span>Thriller</span>
-        <div class="ci-track">
-          <div class="ci-fill" style="width:18%"></div>
-        </div>
-        <strong>18%</strong>
+      <div class="profile-stat-row">
+        <span>Series watched</span>
+        <strong>47</strong>
       </div>
 
-      <div class="genre-row">
-        <span>Comedy</span>
-        <div class="ci-track">
-          <div class="ci-fill" style="width:14%"></div>
-        </div>
-        <strong>14%</strong>
+      <div class="profile-stat-row">
+        <span>Episodes tracked</span>
+        <strong>312</strong>
       </div>
-    </div>
-  </div>
+
+      <div class="profile-stat-row">
+        <span>Reviews written</span>
+        <strong>19</strong>
+      </div>
+
+      <div class="profile-stat-row">
+        <span>Watchlist items</span>
+        <strong>12</strong>
+      </div>
+    </section>
+
+
+    <section class="profile-side-card profile-upgrade-soft">
+      <div class="section-header">
+        <span class="section-title">Profile tools</span>
+      </div>
+
+      <p>
+        Add favourites, manage your watchlist, write reviews, and customise your profile.
+      </p>
+
+      <a href="{{ url_for('settings') }}" class="btn-primary profile-side-button">
+        Customise profile
+      </a>
+    </section>
+
+  </aside>
 
 </div>
 
-<!-- Recent Reviews -->
-<div class="section-header mt-28">
-  <span class="section-title">Recent reviews</span>
-  <span class="see-all">View all</span>
-</div>
-
-<div class="continue-list">
-  <div class="continue-item review-profile-item">
-    <div class="ci-poster p5">W</div>
-    <div class="ci-body">
-      <div class="ci-title">White Lotus S3</div>
-      <div class="stars">★★★★☆</div>
-      <div class="ci-sub">Beautifully shot and tense, but the ending felt a little rushed.</div>
-    </div>
-    <span class="badge badge-finished">Reviewed</span>
-  </div>
-
-  <div class="continue-item review-profile-item">
-    <div class="ci-poster p3">B</div>
-    <div class="ci-body">
-      <div class="ci-title">Black Mirror</div>
-      <div class="stars">★★★★★</div>
-      <div class="ci-sub">Still one of the best shows for dark, futuristic storytelling.</div>
-    </div>
-    <span class="badge badge-finished">Reviewed</span>
-  </div>
-</div>
-
-<!-- Account Shortcuts -->
-<div class="section-header mt-28">
-  <span class="section-title">Account shortcuts</span>
-</div>
-
-<div class="card-grid profile-shortcuts">
-  <a class="profile-shortcut-card" href="mylibrary.html">
-    <span>My Library</span>
-    <strong>58</strong>
-  </a>
-
-  <a class="profile-shortcut-card" href="watchlist.html">
-    <span>Watchlist</span>
-    <strong>12</strong>
-  </a>
-
-  <a class="profile-shortcut-card" href="favourites.html">
-    <span>Favourites</span>
-    <strong>8</strong>
-  </a>
-
-  <a class="profile-shortcut-card" href="friends.html">
-    <span>Friends</span>
-    <strong>3</strong>
-  </a>
-</div>
 {% endblock %}
