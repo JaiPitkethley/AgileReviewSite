@@ -14,60 +14,157 @@
   {% endif %}
 {% endwith %}
 
-<div class="section-header">
-  <span class="section-title">Review Episode</span>
-</div>
+<div class="review-page-shell">
+  <div class="review-panel">
 
-<div class="episode-card">
+    <div class="review-panel-header">
+      <div>
+        <span class="section-title">Write a review</span>
+        <h1>{{ series.name }}</h1>
+        <p>
+          Season {{ episode.season_number }},
+          Episode {{ episode.episode_number }} — {{ episode.name }}
+        </p>
+      </div>
 
-  {% if episode.still_path %}
-    <img class="episode-img"
-         src="https://image.tmdb.org/t/p/w300{{ episode.still_path }}"
-         alt="{{ episode.name }}">
-  {% endif %}
+      <a class="btn-ghost" href="/series/{{ series_id }}/season/{{ episode.season_number }}">
+        Back
+      </a>
+    </div>
 
-  <div class="episode-body">
-    <h2>{{ episode.name }}</h2>
-    <p class="episode-meta">
-      Season {{ episode.season_number }},
-      Episode {{ episode.episode_number }}
-    </p>
+    <div class="review-layout">
 
-    <p>{{ episode.overview }}</p>
+      <div class="review-poster-box">
+        {% if episode.still_path %}
+        <img src="https://image.tmdb.org/t/p/w500{{ episode.still_path }}" alt="{{ episode.name }}">
+        {% else %}
+        <div class="review-poster-placeholder">
+          {{ episode.name[:1] }}
+        </div>
+        {% endif %}
+      </div>
+
+      <form class="review-write-form" method="post" action="/reviews/add">
+
+        <input type="hidden" name="series_id" value="{{ series_id }}">
+        <input type="hidden" name="series_name" value="{{ series.name }}">
+        <input type="hidden" name="season_number" value="{{ episode.season_number }}">
+        <input type="hidden" name="episode_number" value="{{ episode.episode_number }}">
+        <input type="hidden" name="episode_name" value="{{ episode.name }}">
+        <input type="hidden" name="episode_still_path" value="{{ episode.still_path }}">
+
+        <label>Rating</label>
+
+        <div class="star-rating-box">
+          <input type="hidden" name="rating" id="ratingInput"
+            value="{% if existing_review %}{{ existing_review.rating }}{% else %}0{% endif %}">
+
+          <div class="star-rating" id="starRating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+
+          <div class="rating-number">
+            <span id="ratingValue">
+              {% if existing_review %}{{ existing_review.rating }}{% else %}0{% endif %}
+            </span>
+            out of 5
+          </div>
+        </div>
+
+        <label>Your review</label>
+        <textarea name="review_text" rows="9" placeholder="Write your thoughts about this episode..."
+          required>{% if existing_review %}{{ existing_review.review_text }}{% endif %}</textarea>
+
+        <div class="review-form-actions">
+          <button class="btn-primary" type="submit">
+            {% if existing_review %}
+            Update Review
+            {% else %}
+            Save Review
+            {% endif %}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+    {% if existing_review %}
+    <div class="hero-banner" style="margin-top: 18px; margin-bottom: 18px;">
+      <div class="hero-accent-bar"></div>
+      <div class="hero-text">
+        <h2>Your saved review</h2>
+        <p><strong>Your rating:</strong> {{ existing_review.rating }} / 5</p>
+        <p><strong>Your review:</strong> {{ existing_review.review_text if existing_review.review_text else "No written review yet." }}</p>
+      </div>
+    </div>
+    {% endif %}
+
   </div>
-
 </div>
 
-{% if existing_review %}
-<div class="hero-banner" style="margin-top: 18px; margin-bottom: 18px;">
-  <div class="hero-accent-bar"></div>
-  <div class="hero-text">
-    <h2>Your saved review</h2>
-    <p><strong>Your rating:</strong> {{ existing_review.rating }} / 5</p>
-    <p><strong>Your review:</strong> {{ existing_review.review_text if existing_review.review_text else "No written review yet." }}</p>
-  </div>
-</div>
-{% endif %}
+<script>
+  const stars = document.querySelectorAll(".star-rating .star");
+  const starRating = document.getElementById("starRating");
+  const ratingInput = document.getElementById("ratingInput");
+  const ratingValue = document.getElementById("ratingValue");
 
-<form class="review-form" method="post" action="/reviews/add">
-  <input type="hidden" name="series_id" value="{{ series_id }}">
-  <input type="hidden" name="season_number" value="{{ episode.season_number }}">
-  <input type="hidden" name="episode_number" value="{{ episode.episode_number }}">
-  <input type="hidden" name="episode_name" value="{{ episode.name }}">
+  function formatRating(rating) {
+    return Number.isInteger(rating) ? rating.toString() : rating.toFixed(1);
+  }
 
-  <label>Rating</label>
-  <select name="rating">
-    <option value="5" {% if existing_review and existing_review.rating == 5 %}selected{% endif %}>5 stars</option>
-    <option value="4" {% if existing_review and existing_review.rating == 4 %}selected{% endif %}>4 stars</option>
-    <option value="3" {% if existing_review and existing_review.rating == 3 %}selected{% endif %}>3 stars</option>
-    <option value="2" {% if existing_review and existing_review.rating == 2 %}selected{% endif %}>2 stars</option>
-    <option value="1" {% if existing_review and existing_review.rating == 1 %}selected{% endif %}>1 star</option>
-  </select>
+  function paintStars(rating) {
+    stars.forEach(star => {
+      const starValue = Number(star.dataset.value);
 
-  <label>Your review</label>
-  <textarea name="review_text" rows="6" placeholder="Write your thoughts...">{% if existing_review and existing_review.review_text %}{{ existing_review.review_text }}{% endif %}</textarea>
+      let fill = 0;
 
-  <button class="btn-primary" type="submit">Save Review</button>
-</form>
+      if (rating >= starValue) {
+        fill = 100;
+      } else if (rating >= starValue - 0.5) {
+        fill = 50;
+      }
+
+      star.style.setProperty("--fill", fill + "%");
+    });
+
+    ratingValue.textContent = formatRating(rating);
+  }
+
+  function getRatingFromMouse(event, star) {
+    const rect = star.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const starValue = Number(star.dataset.value);
+
+    if (mouseX <= rect.width / 2) {
+      return starValue - 0.5;
+    }
+
+    return starValue;
+  }
+
+  stars.forEach(star => {
+    star.addEventListener("mousemove", function (event) {
+      const previewRating = getRatingFromMouse(event, this);
+      paintStars(previewRating);
+    });
+
+    star.addEventListener("click", function (event) {
+      const chosenRating = getRatingFromMouse(event, this);
+      ratingInput.value = chosenRating;
+      paintStars(chosenRating);
+    });
+  });
+
+  starRating.addEventListener("mouseleave", function () {
+    paintStars(Number(ratingInput.value));
+  });
+
+  paintStars(Number(ratingInput.value));
+</script>
 
 {% endblock %}
