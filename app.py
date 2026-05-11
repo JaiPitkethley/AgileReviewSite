@@ -60,7 +60,35 @@ class UserSeries(db.Model):
     __table_args__ = (
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
+class EpisodeReview(db.Model):
+    __tablename__ = "episode_reviews"
 
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    series_id = db.Column(db.Integer, nullable=False)
+    series_name = db.Column(db.String(200), nullable=False)
+    
+    season_number = db.Column(db.Integer, nullable=False)
+    episode_number = db.Column(db.Integer, nullable=False)
+    episode_name = db.Column(db.String(200), nullable=False)
+    episode_still_path = db.Column(db.String(300), nullable=True)
+
+    rating = db.Column(db.Float, nullable=False)
+    review_text = db.Column(db.Text, nullable=False)
+
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "series_id",
+            "season_number",
+            "episode_number",
+            name="uq_user_episode_review"
+        ),
+    )
 TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
 TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
@@ -354,8 +382,36 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", user=g.user)
+    recent_reviews = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).order_by(
+        EpisodeReview.created_at.desc()
+    ).limit(10).all()
 
+    review_count = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).count()
+
+    watchlist_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watchlist"
+    ).count()
+
+    poster_paths = {}
+
+    for review in recent_reviews:
+        if review.series_id not in poster_paths:
+            series = get_show_details(review.series_id)
+            poster_paths[review.series_id] = series.get("poster_path")
+
+    return render_template(
+        "profile.html",
+        user=g.user,
+        recent_reviews=recent_reviews,
+        review_count=review_count,
+        watchlist_count=watchlist_count,
+        poster_paths=poster_paths
+    )
 
 @app.route("/library")
 @login_required
@@ -411,19 +467,6 @@ def friends():
 def settings():
     return render_template("settings.html", user=g.user)
 
-@app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
-def review_episode(series_id, season_number, episode_number):
-    episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
-
-    params = {
-        "api_key": TMDB_API_KEY,
-        "language": "en-US"
-    }
-
-    episode = requests.get(episode_url, params=params).json()
-
-    return render_template("reviewepisode.html", episode=episode, series_id=series_id)
-
 @app.route("/series/<int:series_id>/season/<int:season_number>")
 def season_detail(series_id, season_number):
     series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
@@ -440,9 +483,131 @@ def season_detail(series_id, season_number):
     series = series_response.json()
     season = season_response.json()
 
-    return render_template("seasondetail.html", series=series, season=season, user=g.user)
-    
+    reviews_by_episode = {}
 
+    if g.user is not None:
+        user_reviews = EpisodeReview.query.filter_by(
+            user_id=g.user.id,
+            series_id=series_id,
+            season_number=season_number
+        ).all()
+
+        reviews_by_episode = {
+            review.episode_number: review
+            for review in user_reviews
+        }
+
+    return render_template(
+        "seasondetail.html",
+        series=series,
+        season=season,
+        reviews_by_episode=reviews_by_episode,
+        user=g.user
+    )
+    
+@app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
+@login_required
+def review_episode(series_id, season_number, episode_number):
+    episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
+    series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
+
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    episode = requests.get(episode_url, params=params).json()
+    series = requests.get(series_url, params=params).json()
+
+    existing_review = EpisodeReview.query.filter_by(
+        user_id=g.user.id,
+        series_id=series_id,
+        season_number=season_number,
+        episode_number=episode_number
+    ).first()
+
+    return render_template(
+        "reviewepisode.html",
+        episode=episode,
+        series=series,
+        series_id=series_id,
+        existing_review=existing_review,
+        user=g.user
+    )
+
+
+@app.route("/reviews/add", methods=["POST"])
+@login_required
+def add_episode_review():
+    series_id = int(request.form.get("series_id"))
+    series_name = request.form.get("series_name")
+    season_number = int(request.form.get("season_number"))
+    episode_number = int(request.form.get("episode_number"))
+    episode_name = request.form.get("episode_name")
+    episode_still_path = request.form.get("episode_still_path")
+    rating = float(request.form.get("rating"))
+    review_text = request.form.get("review_text", "").strip()
+
+    if not review_text:
+        flash("Please write a review before saving.", "error")
+        return redirect(request.referrer or url_for("profile"))
+
+    existing_review = EpisodeReview.query.filter_by(
+        user_id=g.user.id,
+        series_id=series_id,
+        season_number=season_number,
+        episode_number=episode_number
+    ).first()
+
+    if existing_review:
+        existing_review.rating = rating
+        existing_review.review_text = review_text
+        existing_review.episode_name = episode_name
+        existing_review.episode_still_path = episode_still_path
+    else:
+        review = EpisodeReview(
+            user_id=g.user.id,
+            series_id=series_id,
+            series_name=series_name,
+            season_number=season_number,
+            episode_number=episode_number,
+            episode_name=episode_name,
+            episode_still_path=episode_still_path,
+            rating=rating,
+            review_text=review_text
+        )
+
+        db.session.add(review)
+
+    db.session.commit()
+
+    flash("Review saved.", "success")
+    return redirect(url_for(
+        "season_detail",
+        series_id=series_id,
+        season_number=season_number
+    ))
+@app.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_episode_review(review_id):
+    review = EpisodeReview.query.filter_by(
+        id=review_id,
+        user_id=g.user.id
+    ).first_or_404()
+
+    season_number = review.season_number
+    series_id = review.series_id
+
+    db.session.delete(review)
+    db.session.commit()
+
+    flash("Review deleted.", "success")
+
+    return redirect(request.referrer or url_for(
+        "season_detail",
+        series_id=series_id,
+        season_number=season_number
+    ))
 
 if __name__ == "__main__":
     ## create tables if they do not exist

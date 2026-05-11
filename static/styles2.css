@@ -1687,3 +1687,296 @@ select,
   border-color: rgba(212, 96, 96, 0.65);
   background: rgba(212, 96, 96, 0.18);
 }
+
+/* EPISODE REVIEW PAGE */
+
+.review-page-shell {
+  max-width: 1050px;
+  margin: 0 auto;
+}
+
+.review-panel {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.review-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 26px 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.review-panel-header h1 {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+  color: var(--text);
+  margin-top: 8px;
+}
+
+.review-panel-header p {
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.review-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 28px;
+  padding: 30px;
+}
+
+.review-poster-box img,
+.review-poster-placeholder {
+  width: 100%;
+  height: 190px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+}
+
+.review-poster-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 52px;
+  color: var(--text3);
+}
+
+.review-write-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-write-form label {
+  color: var(--text2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.review-write-form select,
+.review-write-form textarea {
+  width: 100%;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-family: var(--sans);
+  font-size: 14px;
+}
+
+.review-write-form textarea {
+  resize: vertical;
+  min-height: 220px;
+}
+
+.review-write-form select:focus,
+.review-write-form textarea:focus {
+  outline: none;
+  border-color: var(--p600);
+}
+
+.review-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+
+/* REVIEW DISPLAY ON EPISODE LIST */
+
+.episode-review-preview {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+}
+
+.episode-review-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.episode-review-label {
+  color: var(--text3);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.episode-review-preview p {
+  color: var(--text2);
+  margin-bottom: 0;
+}
+
+
+/* PROFILE REVIEW LIST */
+
+.profile-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-review-item {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-radius: var(--radius-xl);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+
+.profile-review-img,
+.profile-review-placeholder {
+  width: 150px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+}
+
+.profile-review-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 36px;
+  color: var(--text3);
+}
+
+.profile-review-body h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.profile-review-episode {
+  color: var(--text2);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.profile-review-text {
+  color: var(--text);
+  margin: 8px 0 10px;
+  line-height: 1.6;
+}
+
+@media (max-width: 850px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-review-item {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-review-img,
+  .profile-review-placeholder {
+    width: 100%;
+    height: 180px;
+  }
+}
+.star-rating-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.star-rating {
+  display: flex;
+  gap: 10px;
+  width: fit-content;
+}
+
+.star-rating .star {
+  position: relative;
+  display: inline-block;
+  font-size: 46px;
+  line-height: 1;
+  color: var(--text3);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.star-rating .star::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--fill, 0%);
+  overflow: hidden;
+  color: var(--green);
+}
+
+.star-rating .star:hover {
+  transform: scale(1.08);
+}
+
+.rating-number {
+  margin-top: 12px;
+  color: var(--text2);
+  font-size: 13px;
+}
+.profile-review-poster {
+  width: 110px;
+  height: 165px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+}
+
+.profile-review-item {
+  grid-template-columns: 110px minmax(0, 1fr);
+}
+
+.delete-review-form {
+  margin-top: 10px;
+}
+
+.delete-review-btn {
+  background: transparent;
+  border: 1px solid rgba(212, 96, 96, 0.45);
+  color: var(--red);
+  border-radius: var(--radius-md);
+  padding: 7px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.delete-review-btn:hover {
+  background: rgba(212, 96, 96, 0.12);
+}
+
+.episode-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.episode-delete-review-form {
+  margin: 0;
+}
+
+.episode-review-actions .delete-review-btn {
+  height: 36px;
+}

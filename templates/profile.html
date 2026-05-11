@@ -148,39 +148,71 @@
 
 
     <!-- Recent Reviews -->
+    <!-- Recent Reviews -->
     <section class="profile-block">
       <div class="section-header">
         <span class="section-title">Recent reviews</span>
         <span class="see-all">View all</span>
       </div>
 
-      <div class="card-grid profile-review-grid">
-        <div class="card">
-          <div class="poster p2">S</div>
-          <div class="card-body">
-            <div class="card-title">Severance</div>
-            <div class="card-sub">2025</div>
-            <div class="stars">★★★★★</div>
-          </div>
-        </div>
+      <div class="profile-review-list">
 
-        <div class="card">
-          <div class="poster p4">T</div>
-          <div class="card-body">
-            <div class="card-title">The Bear</div>
-            <div class="card-sub">2024</div>
-            <div class="stars">★★★★☆</div>
-          </div>
-        </div>
+        {% if recent_reviews %}
 
-        <div class="card">
-          <div class="poster p5">G</div>
-          <div class="card-body">
-            <div class="card-title">Ghosts</div>
-            <div class="card-sub">2021</div>
-            <div class="stars">★★★★☆</div>
+        {% for review in recent_reviews %}
+        <div class="profile-review-item">
+
+          {% set poster_path = poster_paths.get(review.series_id) %}
+
+          {% if poster_path %}
+          <img class="profile-review-poster" src="https://image.tmdb.org/t/p/w185{{ poster_path }}"
+            alt="{{ review.series_name }}">
+          {% else %}
+          <div class="profile-review-placeholder profile-review-poster">
+            {{ review.series_name[:1] }}
           </div>
+          {% endif %}
+          <div class="profile-review-body">
+            <h3>{{ review.series_name }}</h3>
+
+            <p class="profile-review-episode">
+              Season {{ review.season_number }},
+              Episode {{ review.episode_number }} — {{ review.episode_name }}
+            </p>
+
+            <div class="stars">
+              {% set full_stars = review.rating|int %}
+              {% set has_half = review.rating - full_stars >= 0.5 %}
+              {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+
+              {{ "★" * full_stars }}{% if has_half %}½{% endif %}{{ "☆" * empty_stars }}
+            </div>
+
+            <p class="profile-review-text">
+              {{ review.review_text }}
+            </p>
+
+            <a class="see-all" href="/series/{{ review.series_id }}/season/{{ review.season_number }}">
+              View episode
+            </a>
+            <form class="delete-review-form" method="post" action="/reviews/{{ review.id }}/delete">
+              <button type="submit" class="delete-review-btn">
+                Delete review
+              </button>
+            </form>
+          </div>
+
         </div>
+        {% endfor %}
+
+        {% else %}
+
+        <p class="empty-text">
+          You have not written any episode reviews yet.
+        </p>
+
+        {% endif %}
+
       </div>
     </section>
 
@@ -216,12 +248,12 @@
 
       <div class="profile-stat-row">
         <span>Reviews written</span>
-        <strong>19</strong>
+        <strong>{{ review_count }}</strong>
       </div>
 
       <div class="profile-stat-row">
         <span>Watchlist items</span>
-        <strong>12</strong>
+        <strong>{{ watchlist_count }}</strong>
       </div>
     </section>
 

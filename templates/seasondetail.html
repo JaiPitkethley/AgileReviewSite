@@ -15,36 +15,70 @@
 <div class="episode-list">
 
   {% for episode in season.episodes %}
-    <div class="episode-card">
 
-      {% if episode.still_path %}
-        <img class="episode-img"
-             src="https://image.tmdb.org/t/p/w300{{ episode.still_path }}"
-             alt="{{ episode.name }}">
-      {% else %}
-        <div class="episode-img episode-placeholder">No Image</div>
+  {% set user_review = reviews_by_episode.get(episode.episode_number) %}
+
+  <div class="episode-card">
+
+    {% if episode.still_path %}
+    <img class="episode-img" src="https://image.tmdb.org/t/p/w300{{ episode.still_path }}" alt="{{ episode.name }}">
+    {% else %}
+    <div class="episode-img episode-placeholder">No Image</div>
+    {% endif %}
+
+    <div class="episode-body">
+      <h3>
+        Episode {{ episode.episode_number }}: {{ episode.name }}
+      </h3>
+
+      <p class="episode-meta">
+        {{ episode.air_date }} · ⭐ {{ "%.1f"|format(episode.vote_average) }}
+      </p>
+
+      <p>
+        {{ episode.overview }}
+      </p>
+
+      {% if user_review %}
+      <div class="episode-review-preview">
+        <div class="episode-review-top">
+          <span class="stars">
+            {% set full_stars = user_review.rating|int %}
+            {% set has_half = user_review.rating - full_stars >= 0.5 %}
+            {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+
+            {{ "★" * full_stars }}{% if has_half %}½{% endif %}{{ "☆" * empty_stars }}
+          </span>
+
+          <span class="episode-review-label">Your review</span>
+        </div>
+
+        <p>{{ user_review.review_text }}</p>
+      </div>
       {% endif %}
 
-      <div class="episode-body">
-        <h3>
-          Episode {{ episode.episode_number }}: {{ episode.name }}
-        </h3>
-
-        <p class="episode-meta">
-          {{ episode.air_date }} · ⭐ {{ "%.1f"|format(episode.vote_average) }}
-        </p>
-
-        <p>
-          {{ episode.overview }}
-        </p>
-
+      <div class="episode-review-actions">
         <a class="btn-primary"
-           href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
+          href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
+          {% if user_review %}
+          Edit Review
+          {% else %}
           Review Episode
+          {% endif %}
         </a>
-      </div>
 
+        {% if user_review %}
+        <form method="post" action="/reviews/{{ user_review.id }}/delete" class="episode-delete-review-form">
+          <button type="submit" class="delete-review-btn">
+            Delete Review
+          </button>
+        </form>
+        {% endif %}
+      </div>
     </div>
+
+  </div>
+
   {% endfor %}
 
 </div>
