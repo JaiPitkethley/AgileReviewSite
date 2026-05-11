@@ -71,12 +71,15 @@ class EpisodeReview(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     series_id = db.Column(db.Integer, nullable=False)
+    series_name = db.Column(db.String(200), nullable=False)
+
     season_number = db.Column(db.Integer, nullable=False)
     episode_number = db.Column(db.Integer, nullable=False)
     episode_name = db.Column(db.String(200), nullable=False)
+    episode_still_path = db.Column(db.String(300), nullable=True)
 
-    rating = db.Column(db.Integer, nullable=False)
-    review_text = db.Column(db.Text, nullable=True)
+    rating = db.Column(db.Float, nullable=False)
+    review_text = db.Column(db.Text, nullable=False)
 
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
@@ -274,7 +277,36 @@ def dashboard():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", user=g.user)
+    recent_reviews = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).order_by(
+        EpisodeReview.created_at.desc()
+    ).limit(10).all()
+
+    review_count = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).count()
+
+    watchlist_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watchlist"
+    ).count()
+
+    poster_paths = {}
+
+    for review in recent_reviews:
+        if review.series_id not in poster_paths:
+            series = get_show_details(review.series_id)
+            poster_paths[review.series_id] = series.get("poster_path")
+
+    return render_template(
+        "profile.html",
+        user=g.user,
+        recent_reviews=recent_reviews,
+        review_count=review_count,
+        watchlist_count=watchlist_count,
+        poster_paths=poster_paths
+    )
 
 
 @app.route("/library")
@@ -385,25 +417,26 @@ def season_detail(series_id, season_number):
     series = series_response.json()
     season = season_response.json()
 
-    season_reviews = EpisodeReview.query.filter_by(
-        user_id=g.user.id,
-        series_id=series_id,
-        season_number=season_number
-    ).all()
+    reviews_by_episode = {}
 
-    review_map = {}
-    for review in season_reviews:
-        review_map[review.episode_number] = {
-            "rating": review.rating,
-            "review_text": review.review_text
+    if g.user is not None:
+        user_reviews = EpisodeReview.query.filter_by(
+            user_id=g.user.id,
+            series_id=series_id,
+            season_number=season_number
+        ).all()
+
+        reviews_by_episode = {
+            review.episode_number: review
+            for review in user_reviews
         }
 
     return render_template(
         "seasondetail.html",
         series=series,
         season=season,
-        user=g.user,
-        review_map=review_map
+        reviews_by_episode=reviews_by_episode,
+        user=g.user
     )
 
 
@@ -411,6 +444,7 @@ def season_detail(series_id, season_number):
 @login_required
 def review_episode(series_id, season_number, episode_number):
     episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
+    series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
 
     params = {
         "api_key": TMDB_API_KEY,
@@ -418,6 +452,7 @@ def review_episode(series_id, season_number, episode_number):
     }
 
     episode = requests.get(episode_url, params=params).json()
+    series = requests.get(series_url, params=params).json()
 
     existing_review = EpisodeReview.query.filter_by(
         user_id=g.user.id,
@@ -429,6 +464,7 @@ def review_episode(series_id, season_number, episode_number):
     return render_template(
         "reviewepisode.html",
         episode=episode,
+        series=series,
         series_id=series_id,
         existing_review=existing_review,
         user=g.user
@@ -526,36 +562,43 @@ def update_series_status():
 
 @app.route("/reviews/add", methods=["POST"])
 @login_required
-def add_review():
-    series_id = request.form.get("series_id")
-    season_number = request.form.get("season_number")
-    episode_number = request.form.get("episode_number")
-    episode_name = request.form.get("episode_name", "").strip()
-    rating = request.form.get("rating")
+def add_episode_review():
+    series_id = int(request.form.get("series_id"))
+    series_name = request.form.get("series_name")
+    season_number = int(request.form.get("season_number"))
+    episode_number = int(request.form.get("episode_number"))
+    episode_name = request.form.get("episode_name")
+    episode_still_path = request.form.get("episode_still_path")
+    rating = float(request.form.get("rating"))
     review_text = request.form.get("review_text", "").strip()
 
-    if not all([series_id, season_number, episode_number, episode_name, rating]):
-        flash("Missing review data.", "error")
-        return redirect(request.referrer or url_for("dashboard"))
+    if not review_text:
+        flash("Please write a review before saving.", "error")
+        return redirect(request.referrer or url_for("profile"))
 
-    existing = EpisodeReview.query.filter_by(
+    existing_review = EpisodeReview.query.filter_by(
         user_id=g.user.id,
-        series_id=int(series_id),
-        season_number=int(season_number),
-        episode_number=int(episode_number)
+        series_id=series_id,
+        season_number=season_number,
+        episode_number=episode_number
     ).first()
 
-    if existing:
-        existing.rating = int(rating)
-        existing.review_text = review_text
+    if existing_review:
+        existing_review.series_name = series_name
+        existing_review.episode_name = episode_name
+        existing_review.episode_still_path = episode_still_path
+        existing_review.rating = rating
+        existing_review.review_text = review_text
     else:
         review = EpisodeReview(
             user_id=g.user.id,
-            series_id=int(series_id),
-            season_number=int(season_number),
-            episode_number=int(episode_number),
+            series_id=series_id,
+            series_name=series_name,
+            season_number=season_number,
+            episode_number=episode_number,
             episode_name=episode_name,
-            rating=int(rating),
+            episode_still_path=episode_still_path,
+            rating=rating,
             review_text=review_text
         )
         db.session.add(review)
@@ -566,11 +609,34 @@ def add_review():
     return redirect(
         url_for(
             "review_episode",
-            series_id=int(series_id),
-            season_number=int(season_number),
-            episode_number=int(episode_number)
+            series_id=series_id,
+            season_number=season_number,
+            episode_number=episode_number
         )
     )
+
+
+@app.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_episode_review(review_id):
+    review = EpisodeReview.query.filter_by(
+        id=review_id,
+        user_id=g.user.id
+    ).first_or_404()
+
+    series_id = review.series_id
+    season_number = review.season_number
+
+    db.session.delete(review)
+    db.session.commit()
+
+    flash("Review deleted.", "success")
+
+    return redirect(request.referrer or url_for(
+        "season_detail",
+        series_id=series_id,
+        season_number=season_number
+    ))
 
 
 if __name__ == "__main__":
