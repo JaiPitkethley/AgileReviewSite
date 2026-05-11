@@ -55,10 +55,16 @@
 
   {% if shows %}
   {% for show in shows %}
-  <a class="card series-card-link" href="/series/{{ show.id }}">
+  <div class="card">
 
-    <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
-    </div>
+    <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+      </div>
+
+      <div class="card-status-row">
+        <span class="badge badge-new">Saved</span>
+      </div>
+    </a>
 
     <div class="progress-bar">
       <div class="progress-fill" style="width:0%"></div>
@@ -66,18 +72,31 @@
 
     <div class="card-body">
       <div class="card-title">{{ show.name }}</div>
+
       <div class="card-sub">
         TMDB Rating: {{ show.vote_average }}
         <div class="stars">★★★★★</div>
       </div>
 
+      <form action="/series/status" method="POST" class="status-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <select name="status" class="status-select" onchange="this.form.submit()">
+          <option value="watchlist" selected>Watchlist</option>
+          <option value="watching">Watching</option>
+          <option value="completed">Completed</option>
+          <option value="on_hold">On Hold</option>
+          <option value="dropped">Dropped</option>
+        </select>
+      </form>
+
       <form action="/watchlist/remove" method="POST" class="remove-watchlist-form">
-        <input type="hidden" name="tmdb_id" value="{{ show.id }}">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
         <button class="btn-ghost" type="submit">Remove</button>
       </form>
     </div>
 
-  </a>
+  </div>
   {% endfor %}
   {% else %}
   <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
