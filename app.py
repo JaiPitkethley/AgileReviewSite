@@ -5,8 +5,8 @@ from pathlib import Path
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-## database + API imports
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -15,14 +15,19 @@ DATABASE = BASE_DIR / "users.db"
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "change-this-before-sharing"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
-
-## SQLAlchemy configuration (SQLite file stored locally)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(DATABASE)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-## Users table
+TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
+TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
+TMDB_BASE_URL = "https://api.themoviedb.org/3"
+
+
+# -------------------- MODELS --------------------
+
 class User(db.Model):
     __tablename__ = "users"
 
@@ -32,55 +37,92 @@ class User(db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
-    series = db.relationship("UserSeries", backref="user", lazy=True)
+    series = db.relationship("UserSeries", backref="user", lazy=True, cascade="all, delete-orphan")
+    episode_reviews = db.relationship("EpisodeReview", backref="user", lazy=True, cascade="all, delete-orphan")
+    favourites = db.relationship("Favourite", backref="user", lazy=True, cascade="all, delete-orphan")
+
 
 class UserSeries(db.Model):
     __tablename__ = "user_series"
 
     id = db.Column(db.Integer, primary_key=True)
-
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     tmdb_id = db.Column(db.Integer, nullable=False)
 
     name = db.Column(db.String(200), nullable=False)
     poster_path = db.Column(db.String(300), nullable=True)
     vote_average = db.Column(db.Float, nullable=True)
-
-    # Stores genres as text like: "Comedy, Drama, Sci-Fi"
     genres = db.Column(db.String(300), nullable=True)
 
-    # Main status system
     # watchlist, watching, completed, on_hold, dropped
     status = db.Column(db.String(30), nullable=False, default="watchlist")
-
     priority = db.Column(db.Boolean, default=False)
-
     added_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
     __table_args__ = (
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
 
-TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
-TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
-TMDB_BASE_URL = "https://api.themoviedb.org/3"
+
+class EpisodeReview(db.Model):
+    __tablename__ = "episode_reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    series_id = db.Column(db.Integer, nullable=False)
+    season_number = db.Column(db.Integer, nullable=False)
+    episode_number = db.Column(db.Integer, nullable=False)
+    episode_name = db.Column(db.String(200), nullable=False)
+
+    rating = db.Column(db.Integer, nullable=False)
+    review_text = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "series_id",
+            "season_number",
+            "episode_number",
+            name="uq_user_episode_review"
+        ),
+    )
+
+
+class Favourite(db.Model):
+    __tablename__ = "favourites"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    tmdb_id = db.Column(db.Integer, nullable=False)
+
+    name = db.Column(db.String(200), nullable=False)
+    poster_path = db.Column(db.String(300), nullable=True)
+    vote_average = db.Column(db.Float, nullable=True)
+    added_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_favourite_tmdb"),
+    )
+
+
+# -------------------- HELPERS --------------------
 
 def get_show_details(tmdb_id):
-    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={TMDB_API_KEY}"
-    response = requests.get(url)
-    data = response.json()
-    return data
-def get_genre_stats(shows):
-    stats = {}
+    url = f"{TMDB_BASE_URL}/tv/{tmdb_id}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+    response = requests.get(url, params=params)
+    return response.json()
 
-    for show in shows:
-        if not show.genres:
-            continue
 
 def get_first_genre(show):
     if not show.genres:
         return None
-
     return show.genres.split(",")[0].strip()
 
 
@@ -89,7 +131,6 @@ def get_genre_stats(shows):
 
     for show in shows:
         genre = get_first_genre(show)
-
         if genre:
             stats[genre] = stats.get(genre, 0) + 1
 
@@ -101,48 +142,17 @@ def get_status_genre_stats(shows):
 
     for show in shows:
         status = show.status
+        genre = get_first_genre(show)
 
         if status not in stats:
             stats[status] = {}
-
-        genre = get_first_genre(show)
 
         if genre:
             stats[status][genre] = stats[status].get(genre, 0) + 1
 
     return stats
 
-    return dict(sorted(stats.items(), key=lambda item: item[1], reverse=True))
 
-
-def get_status_genre_stats(shows):
-    stats = {}
-
-    for show in shows:
-        status = show.status
-
-        if status not in stats:
-            stats[status] = {}
-
-        if show.genres:
-            first_genere = show.genres.split(",")[0].strip()
-
-            if first_genere:
-                stats[status][first_genere] = stats[status].get(first_genere, 0) + 1
-
-    return stats
-
-## load logged in user
-@app.before_request
-def load_logged_in_user():
-    user_id = session.get("user_id")
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = User.query.with_entities(User.id, User.username, User.email).filter_by(id=user_id).first()
-
-## login required decorator
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
@@ -152,9 +162,25 @@ def login_required(view):
         return view(*args, **kwargs)
     return wrapped_view
 
+
+# -------------------- AUTH / SESSION --------------------
+
+@app.before_request
+def load_logged_in_user():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = User.query.with_entities(
+            User.id, User.username, User.email
+        ).filter_by(id=user_id).first()
+
+
 @app.route("/")
 def index():
     return redirect(url_for("landing"))
+
 
 @app.route("/landing")
 def landing():
@@ -162,6 +188,7 @@ def landing():
     if g.user is not None:
         prefill_email = g.user.email
     return render_template("landing.html", prefill_email=prefill_email)
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -180,7 +207,6 @@ def signup():
             return render_template("signup.html", prefill_email=email)
 
         existing_user = User.query.filter_by(email=email).first()
-
         if existing_user is not None:
             flash("That email is already registered. Please sign in instead.", "error")
             return render_template("signup.html", prefill_email=email)
@@ -199,6 +225,7 @@ def signup():
         return redirect(url_for("dashboard"))
 
     return render_template("signup.html", prefill_email=prefill_email)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -228,128 +255,21 @@ def login():
 
     return render_template("login.html")
 
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template("reviewsitehome.html", user=g.user)
-@app.route("/series/<int:series_id>")
-def series_detail(series_id):
-    url = f"https://api.themoviedb.org/3/tv/{series_id}"
-    params = {
-        "api_key": TMDB_API_KEY,
-        "language": "en-US"
-    }
 
-    response = requests.get(url, params=params)
-    series = response.json()
-
-    return render_template("seriesdetail.html", series=series, user=g.user)
-
-@app.route("/watchlist/add", methods=["POST"])
-@login_required
-def add_to_watchlist():
-    tmdb_id = request.form.get("tmdb_id")
-
-    if not tmdb_id:
-        return redirect(request.referrer or url_for("dashboard"))
-
-    tmdb_id = int(tmdb_id)
-
-    existing = UserSeries.query.filter_by(
-        user_id=g.user.id,
-        tmdb_id=tmdb_id
-    ).first()
-
-    if existing:
-        existing.status = "watchlist"
-        db.session.commit()
-        return redirect(request.referrer or url_for("watchlist"))
-
-    show = get_show_details(tmdb_id)
-
-    genre_names = []
-    for genre in show.get("genres", []):
-        genre_names.append(genre.get("name"))
-
-    entry = UserSeries(
-        user_id=g.user.id,
-        tmdb_id=tmdb_id,
-        name=show.get("name", "Unknown Series"),
-        poster_path=show.get("poster_path"),
-        vote_average=show.get("vote_average"),
-        genres=", ".join(genre_names),
-        status="watchlist"
-    )
-
-    db.session.add(entry)
-    db.session.commit()
-
-    return redirect(request.referrer or url_for("watchlist"))
-def remove_from_watchlist():
-    tmdb_id = request.form.get("tmdb_id")
-
-    if tmdb_id:
-        UserSeries.query.filter_by(
-            user_id=g.user.id,
-            tmdb_id=int(tmdb_id)
-        ).delete()
-        db.session.commit()
-
-    return redirect(request.referrer or url_for("watchlist"))
-@login_required
-def remove_from_watchlist():
-    tmdb_id = request.form.get("tmdb_id")
-
-    Watchlist.query.filter_by(user_id=g.user.id, tmdb_id=int(tmdb_id)).delete()
-    db.session.commit()
-
-    # flash("Removed from your watchlist.", "success")
-    return redirect(request.referrer or url_for("dashboard"))
-@app.route("/series/status", methods=["POST"])
-@login_required
-def update_series_status():
-    tmdb_id = request.form.get("tmdb_id")
-    status = request.form.get("status")
-
-    allowed_statuses = ["watchlist", "watching", "completed", "on_hold", "dropped"]
-
-    if not tmdb_id or status not in allowed_statuses:
-        return redirect(request.referrer or url_for("library"))
-
-    item = UserSeries.query.filter_by(
-        user_id=g.user.id,
-        tmdb_id=int(tmdb_id)
-    ).first()
-
-    if item:
-        item.status = status
-        db.session.commit()
-
-    return redirect(request.referrer or url_for("library"))
-@app.route("/watchlist")
-@login_required
-def watchlist():
-    shows = UserSeries.query.filter_by(
-        user_id=g.user.id,
-        status="watchlist"
-    ).all()
-
-    genre_stats = get_genre_stats(shows)
-
-    return render_template(
-        "watchlist.html",
-        shows=shows,
-        user=g.user,
-        genre_stats=genre_stats
-    )
-    
 @app.route("/logout")
 def logout():
     session.clear()
     flash("You have been signed out.", "success")
     return redirect(url_for("landing"))
 
-## Real logged-in pages
+
+# -------------------- MAIN PAGES --------------------
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("reviewsitehome.html", user=g.user)
+
 
 @app.route("/profile")
 @login_required
@@ -388,10 +308,29 @@ def library():
     )
 
 
+@app.route("/watchlist")
+@login_required
+def watchlist():
+    shows = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watchlist"
+    ).all()
+
+    genre_stats = get_genre_stats(shows)
+
+    return render_template(
+        "watchlist.html",
+        shows=shows,
+        user=g.user,
+        genre_stats=genre_stats
+    )
+
+
 @app.route("/favourites")
 @login_required
 def favourites():
-    return render_template("favourites.html", user=g.user)
+    items = Favourite.query.filter_by(user_id=g.user.id).all()
+    return render_template("favourites.html", user=g.user, favourite_items=items)
 
 
 @app.route("/community")
@@ -411,20 +350,26 @@ def friends():
 def settings():
     return render_template("settings.html", user=g.user)
 
-@app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
-def review_episode(series_id, season_number, episode_number):
-    episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
 
+# -------------------- SERIES --------------------
+
+@app.route("/series/<int:series_id>")
+@login_required
+def series_detail(series_id):
+    url = f"{TMDB_BASE_URL}/tv/{series_id}"
     params = {
         "api_key": TMDB_API_KEY,
         "language": "en-US"
     }
 
-    episode = requests.get(episode_url, params=params).json()
+    response = requests.get(url, params=params)
+    series = response.json()
 
-    return render_template("reviewepisode.html", episode=episode, series_id=series_id)
+    return render_template("seriesdetail.html", series=series, user=g.user)
+
 
 @app.route("/series/<int:series_id>/season/<int:season_number>")
+@login_required
 def season_detail(series_id, season_number):
     series_url = f"{TMDB_BASE_URL}/tv/{series_id}"
     season_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}"
@@ -440,13 +385,193 @@ def season_detail(series_id, season_number):
     series = series_response.json()
     season = season_response.json()
 
-    return render_template("seasondetail.html", series=series, season=season, user=g.user)
-    
+    season_reviews = EpisodeReview.query.filter_by(
+        user_id=g.user.id,
+        series_id=series_id,
+        season_number=season_number
+    ).all()
+
+    review_map = {}
+    for review in season_reviews:
+        review_map[review.episode_number] = {
+            "rating": review.rating,
+            "review_text": review.review_text
+        }
+
+    return render_template(
+        "seasondetail.html",
+        series=series,
+        season=season,
+        user=g.user,
+        review_map=review_map
+    )
+
+
+@app.route("/series/<int:series_id>/season/<int:season_number>/episode/<int:episode_number>/review")
+@login_required
+def review_episode(series_id, season_number, episode_number):
+    episode_url = f"{TMDB_BASE_URL}/tv/{series_id}/season/{season_number}/episode/{episode_number}"
+
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+
+    episode = requests.get(episode_url, params=params).json()
+
+    existing_review = EpisodeReview.query.filter_by(
+        user_id=g.user.id,
+        series_id=series_id,
+        season_number=season_number,
+        episode_number=episode_number
+    ).first()
+
+    return render_template(
+        "reviewepisode.html",
+        episode=episode,
+        series_id=series_id,
+        existing_review=existing_review,
+        user=g.user
+    )
+
+
+# -------------------- WATCHLIST / LIBRARY STATUS --------------------
+
+@app.route("/watchlist/add", methods=["POST"])
+@login_required
+def add_to_watchlist():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if not tmdb_id:
+        return redirect(request.referrer or url_for("dashboard"))
+
+    tmdb_id = int(tmdb_id)
+
+    existing = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id
+    ).first()
+
+    if existing:
+        existing.status = "watchlist"
+        db.session.commit()
+        return redirect(request.referrer or url_for("watchlist"))
+
+    show = get_show_details(tmdb_id)
+
+    genre_names = []
+    for genre in show.get("genres", []):
+        if genre.get("name"):
+            genre_names.append(genre.get("name"))
+
+    entry = UserSeries(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id,
+        name=show.get("name", "Unknown Series"),
+        poster_path=show.get("poster_path"),
+        vote_average=show.get("vote_average"),
+        genres=", ".join(genre_names),
+        status="watchlist"
+    )
+
+    db.session.add(entry)
+    db.session.commit()
+
+    return redirect(request.referrer or url_for("watchlist"))
+
+
+@app.route("/watchlist/remove", methods=["POST"])
+@login_required
+def remove_from_watchlist():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if tmdb_id:
+        UserSeries.query.filter_by(
+            user_id=g.user.id,
+            tmdb_id=int(tmdb_id),
+            status="watchlist"
+        ).delete()
+        db.session.commit()
+
+    return redirect(request.referrer or url_for("watchlist"))
+
+
+@app.route("/series/status", methods=["POST"])
+@login_required
+def update_series_status():
+    tmdb_id = request.form.get("tmdb_id")
+    status = request.form.get("status")
+
+    allowed_statuses = ["watchlist", "watching", "completed", "on_hold", "dropped"]
+
+    if not tmdb_id or status not in allowed_statuses:
+        return redirect(request.referrer or url_for("library"))
+
+    item = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=int(tmdb_id)
+    ).first()
+
+    if item:
+        item.status = status
+        db.session.commit()
+
+    if status == "watchlist":
+        return redirect(url_for("watchlist"))
+
+    return redirect(request.referrer or url_for("library"))
+
+
+# -------------------- REVIEWS --------------------
+
+@app.route("/reviews/add", methods=["POST"])
+@login_required
+def add_review():
+    series_id = request.form.get("series_id")
+    season_number = request.form.get("season_number")
+    episode_number = request.form.get("episode_number")
+    episode_name = request.form.get("episode_name", "").strip()
+    rating = request.form.get("rating")
+    review_text = request.form.get("review_text", "").strip()
+
+    if not all([series_id, season_number, episode_number, episode_name, rating]):
+        flash("Missing review data.", "error")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    existing = EpisodeReview.query.filter_by(
+        user_id=g.user.id,
+        series_id=int(series_id),
+        season_number=int(season_number),
+        episode_number=int(episode_number)
+    ).first()
+
+    if existing:
+        existing.rating = int(rating)
+        existing.review_text = review_text
+    else:
+        review = EpisodeReview(
+            user_id=g.user.id,
+            series_id=int(series_id),
+            season_number=int(season_number),
+            episode_number=int(episode_number),
+            episode_name=episode_name,
+            rating=int(rating),
+            review_text=review_text
+        )
+        db.session.add(review)
+
+    db.session.commit()
+    flash("Review saved.", "success")
+
+    return redirect(
+        url_for(
+            "review_episode",
+            series_id=int(series_id),
+            season_number=int(season_number),
+            episode_number=int(episode_number)
+        )
+    )
 
 
 if __name__ == "__main__":
-    ## create tables if they do not exist
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
-    

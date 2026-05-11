@@ -4,6 +4,16 @@
 
 {% block content %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-stack auth-flashes">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <div class="section-header">
   <span class="section-title">Review Episode</span>
 </div>
@@ -28,6 +38,17 @@
 
 </div>
 
+{% if existing_review %}
+<div class="hero-banner" style="margin-top: 18px; margin-bottom: 18px;">
+  <div class="hero-accent-bar"></div>
+  <div class="hero-text">
+    <h2>Your saved review</h2>
+    <p><strong>Your rating:</strong> {{ existing_review.rating }} / 5</p>
+    <p><strong>Your review:</strong> {{ existing_review.review_text if existing_review.review_text else "No written review yet." }}</p>
+  </div>
+</div>
+{% endif %}
+
 <form class="review-form" method="post" action="/reviews/add">
   <input type="hidden" name="series_id" value="{{ series_id }}">
   <input type="hidden" name="season_number" value="{{ episode.season_number }}">
@@ -36,15 +57,15 @@
 
   <label>Rating</label>
   <select name="rating">
-    <option value="5">5 stars</option>
-    <option value="4">4 stars</option>
-    <option value="3">3 stars</option>
-    <option value="2">2 stars</option>
-    <option value="1">1 star</option>
+    <option value="5" {% if existing_review and existing_review.rating == 5 %}selected{% endif %}>5 stars</option>
+    <option value="4" {% if existing_review and existing_review.rating == 4 %}selected{% endif %}>4 stars</option>
+    <option value="3" {% if existing_review and existing_review.rating == 3 %}selected{% endif %}>3 stars</option>
+    <option value="2" {% if existing_review and existing_review.rating == 2 %}selected{% endif %}>2 stars</option>
+    <option value="1" {% if existing_review and existing_review.rating == 1 %}selected{% endif %}>1 star</option>
   </select>
 
   <label>Your review</label>
-  <textarea name="review_text" rows="6" placeholder="Write your thoughts..."></textarea>
+  <textarea name="review_text" rows="6" placeholder="Write your thoughts...">{% if existing_review and existing_review.review_text %}{{ existing_review.review_text }}{% endif %}</textarea>
 
   <button class="btn-primary" type="submit">Save Review</button>
 </form>

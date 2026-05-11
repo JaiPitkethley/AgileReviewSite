@@ -38,10 +38,28 @@
           {{ episode.overview }}
         </p>
 
-        <a class="btn-primary"
-           href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
-          Review Episode
-        </a>
+        {% if review_map and episode.episode_number in review_map %}
+          <div class="hero-banner" style="margin-top: 12px; margin-bottom: 12px; padding: 16px 20px;">
+            <div class="hero-accent-bar"></div>
+            <div class="hero-text">
+              <h2 style="font-size: 18px; margin-bottom: 6px;">Reviewed</h2>
+              <p><strong>{{ review_map[episode.episode_number].rating }} stars</strong></p>
+              <p>
+                {{ review_map[episode.episode_number].review_text if review_map[episode.episode_number].review_text else "No written review yet." }}
+              </p>
+            </div>
+          </div>
+
+          <a class="btn-ghost"
+             href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
+            Edit Review
+          </a>
+        {% else %}
+          <a class="btn-primary"
+             href="/series/{{ series.id }}/season/{{ season.season_number }}/episode/{{ episode.episode_number }}/review">
+            Review Episode
+          </a>
+        {% endif %}
       </div>
 
     </div>
