@@ -15,13 +15,11 @@
     <a class="sb-item {% if request.endpoint == 'library' %}active{% endif %}" href="{{ url_for('library') }}">
       <span class="sb-icon">&#9723;</span>
       My Library
-      <span class="sb-badge">58</span>
     </a>
 
     <a class="sb-item {% if request.endpoint == 'watchlist' %}active{% endif %}" href="{{ url_for('watchlist') }}">
       <span class="sb-icon">&#9651;</span>
       Watchlist
-      <span class="sb-badge">12</span>
     </a>
 
     <a class="sb-item {% if request.endpoint == 'favourites' %}active{% endif %}" href="{{ url_for('favourites') }}">
@@ -42,7 +40,6 @@
     <a class="sb-item {% if request.endpoint == 'friends' %}active{% endif %}" href="{{ url_for('friends') }}">
       <span class="sb-icon">&#9723;</span>
       Friends
-      <span class="sb-badge">3</span>
     </a>
   </nav>
 

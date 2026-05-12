@@ -6,9 +6,11 @@
 
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
+
   <div class="hero-text">
     <h2>{{ user.username }}'s Watchlist</h2>
     <p>Your saved upcoming series, recommendations, and future binge queue.</p>
+
     <div class="hero-actions">
       <button class="btn-primary">Start watching</button>
       <button class="btn-ghost">Browse recommendations</button>
@@ -20,12 +22,9 @@
       <div class="hero-stat-n">{{ shows|length }}</div>
       <div class="hero-stat-l">Saved</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">4</div>
-      <div class="hero-stat-l">New Releases</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-n">3</div>
+      <div class="hero-stat-n">{{ priority_count }}</div>
       <div class="hero-stat-l">Priority</div>
     </div>
   </div>
@@ -33,12 +32,10 @@
 
 <div class="filter-row">
   <span class="filter-label">Filter</span>
-  <div class="chip active" onclick="toggleChip(this)">All</div>
-  <div class="chip" onclick="toggleChip(this)">New</div>
-  <div class="chip" onclick="toggleChip(this)">Upcoming</div>
-  <div class="chip" onclick="toggleChip(this)">Priority</div>
-  <div class="chip" onclick="toggleChip(this)">Recommended</div>
+  <div class="chip active" onclick="filterWatchlist(this, 'all')">All</div>
+  <div class="chip" onclick="filterWatchlist(this, 'priority')">Priority</div>
 </div>
+
 {% if request.args.get('q') %}
 <div class="section-header mt-4" id="searchResultsHeader">
   <span class="section-title">Search Results for "{{ request.args.get('q') }}"</span>
@@ -46,6 +43,7 @@
 
 <div id="topbarSearchResults" class="card-grid"></div>
 {% endif %}
+
 <div class="section-header mt-4">
   <span class="section-title">Saved Series</span>
   <span class="see-all">Manage all</span>
@@ -55,14 +53,30 @@
 
   {% if shows %}
   {% for show in shows %}
-  <div class="card">
+
+  <div class="card watchlist-card {% if show.priority %}priority-card{% endif %}"
+    data-priority="{% if show.priority %}true{% else %}false{% endif %}">
+
+    <div class="watchlist-card-top">
+      <span class="status-notch watchlist-notch">Saved</span>
+
+      <form action="/watchlist/priority" method="POST" class="priority-pin-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <button class="btn-priority-pin {% if show.priority %}active{% endif %}" type="submit"
+          title="{% if show.priority %}Unpin priority{% else %}Pin as priority{% endif %}"
+          aria-label="{% if show.priority %}Unpin priority{% else %}Pin as priority{% endif %}">
+
+          <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 4h6v2l-1.5 1.5v4.2l3.2 3.2V17H13v5h-2v-5H7.3v-2.1l3.2-3.2V7.5L9 6V4Z"></path>
+          </svg>
+
+        </button>
+      </form>
+    </div>
 
     <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
       <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
-      </div>
-
-      <div class="card-status-row">
-        <span class="badge badge-new">Saved</span>
       </div>
     </a>
 
@@ -97,11 +111,32 @@
     </div>
 
   </div>
+
   {% endfor %}
   {% else %}
   <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
   {% endif %}
 
 </div>
+
+<script>
+  function filterWatchlist(clickedChip, filterType) {
+    const chips = document.querySelectorAll(".filter-row .chip");
+    const cards = document.querySelectorAll(".watchlist-card");
+
+    chips.forEach(chip => chip.classList.remove("active"));
+    clickedChip.classList.add("active");
+
+    cards.forEach(card => {
+      const isPriority = card.dataset.priority === "true";
+
+      if (filterType === "priority" && !isPriority) {
+        card.classList.add("watchlist-hidden");
+      } else {
+        card.classList.remove("watchlist-hidden");
+      }
+    });
+  }
+</script>
 
 {% endblock %}
