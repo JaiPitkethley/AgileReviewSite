@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner profile-page-hero">
+    <div class="hero-accent-bar"></div>
+
+    <div class="profile-avatar-xl">
+        {{ profile_user.username[:2] | upper }}
+    </div>
+
+    <div class="hero-text">
+        <div class="profile-title-row">
+            <h2>{{ profile_user.username }}</h2>
+
+            {% if profile_user.id != g.user.id %}
+            <form method="post" action="{{ url_for('remove_friend', username=profile_user.username) }}">
+                <button type="submit" class="btn-ghost profile-small-btn">
+                    Remove friend
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <p>
+            View {{ profile_user.username }}'s series activity, watchlist progress,
+            and recent episode reviews.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#recent-reviews" class="btn-ghost">See reviews</a>
+        </div>
+    </div>
+
+    <div class="hero-stat-row">
+        <div class="hero-stat">
+            <div class="hero-stat-n">{{ completed_count }}</div>
+            <div class="hero-stat-l">Finished</div>
+        </div>
+
+        <div class="hero-stat">
+            <div class="hero-stat-n">{{ watching_count }}</div>
+            <div class="hero-stat-l">Watching</div>
+        </div>
+
+        <div class="hero-stat">
+            <div class="hero-stat-n">{{ review_count }}</div>
+            <div class="hero-stat-l">Reviews</div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-row profile-filter-row">
+    <span class="filter-label">Profile</span>
+    <div class="chip active">Overview</div>
+    <div class="chip">Reviews</div>
+    <div class="chip">Watchlist</div>
+</div>
+
+<div class="profile-dashboard-grid">
+
+    <div class="profile-main">
+
+        <section class="profile-block" id="recent-reviews">
+            <div class="section-header">
+                <span class="section-title">Recent reviews</span>
+            </div>
+
+            <div class="profile-review-list">
+
+                {% if recent_reviews %}
+
+                {% for review in recent_reviews %}
+                <div class="profile-review-item">
+
+                    {% set poster_path = poster_paths.get(review.series_id) %}
+
+                    {% if poster_path %}
+                    <img class="profile-review-poster" src="https://image.tmdb.org/t/p/w185{{ poster_path }}"
+                        alt="{{ review.series_name }}">
+                    {% else %}
+                    <div class="profile-review-placeholder profile-review-poster">
+                        {{ review.series_name[:1] }}
+                    </div>
+                    {% endif %}
+
+                    <div class="profile-review-body">
+                        <h3>{{ review.series_name }}</h3>
+
+                        <p class="profile-review-episode">
+                            Season {{ review.season_number }},
+                            Episode {{ review.episode_number }} — {{ review.episode_name }}
+                        </p>
+
+                        <div class="stars">
+                            {% set full_stars = review.rating|int %}
+                            {% set has_half = review.rating - full_stars >= 0.5 %}
+                            {% set empty_stars = 5 - full_stars - (1 if has_half else 0) %}
+
+                            {{ "★" * full_stars }}{% if has_half %}½{% endif %}{{ "☆" * empty_stars }}
+                        </div>
+
+                        <p class="profile-review-text">
+                            {{ review.review_text }}
+                        </p>
+
+                        <a class="see-all" href="/series/{{ review.series_id }}/season/{{ review.season_number }}">
+                            View episode
+                        </a>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+                {% else %}
+
+                <p class="empty-text">
+                    {{ profile_user.username }} has not written any reviews yet.
+                </p>
+
+                {% endif %}
+
+            </div>
+        </section>
+
+    </div>
+
+    <aside class="profile-side">
+
+        <section class="profile-side-card">
+            <div class="section-header">
+                <span class="section-title">Stats</span>
+            </div>
+
+            <div class="profile-stat-row">
+                <span>Watching</span>
+                <strong>{{ watching_count }}</strong>
+            </div>
+
+            <div class="profile-stat-row">
+                <span>Finished</span>
+                <strong>{{ completed_count }}</strong>
+            </div>
+
+            <div class="profile-stat-row">
+                <span>Reviews written</span>
+                <strong>{{ review_count }}</strong>
+            </div>
+
+            <div class="profile-stat-row">
+                <span>Watchlist items</span>
+                <strong>{{ watchlist_count }}</strong>
+            </div>
+        </section>
+
+    </aside>
+
+</div>
+
+{% endblock %}

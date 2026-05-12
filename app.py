@@ -32,7 +32,7 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
@@ -110,7 +110,30 @@ class Favourite(db.Model):
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_favourite_tmdb"),
     )
 
+class Friendship(db.Model):
+    __tablename__ = "friendships"
 
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    friend_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    user = db.relationship(
+        "User",
+        foreign_keys=[user_id],
+        backref=db.backref("friendships", cascade="all, delete-orphan")
+    )
+
+    friend = db.relationship(
+        "User",
+        foreign_keys=[friend_id]
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "friend_id", name="uq_user_friend"),
+    )
 # -------------------- HELPERS --------------------
 
 def get_show_details(tmdb_id):
@@ -213,6 +236,11 @@ def signup():
         if existing_user is not None:
             flash("That email is already registered. Please sign in instead.", "error")
             return render_template("signup.html", prefill_email=email)
+        
+        existing_username = User.query.filter_by(username=username).first()
+        if existing_username is not None:
+            flash("That username is already taken. Please choose another one.", "error")
+            return render_template("signup.html", prefill_email=email)
 
         password_hash = generate_password_hash(password, method="pbkdf2:sha256")
 
@@ -308,7 +336,64 @@ def profile():
         poster_paths=poster_paths
     )
 
+@app.route("/profile/<username>")
+@login_required
+def public_profile(username):
+    profile_user = User.query.filter_by(username=username).first_or_404()
 
+    is_friend = Friendship.query.filter_by(
+        user_id=g.user.id,
+        friend_id=profile_user.id
+    ).first() is not None
+
+    if profile_user.id != g.user.id and not is_friend:
+        flash("You can only view profiles of your friends.", "error")
+        return redirect(url_for("friends"))
+
+    recent_reviews = EpisodeReview.query.filter_by(
+        user_id=profile_user.id
+    ).order_by(
+        EpisodeReview.created_at.desc()
+    ).limit(10).all()
+
+    review_count = EpisodeReview.query.filter_by(
+        user_id=profile_user.id
+    ).count()
+
+    watchlist_count = UserSeries.query.filter_by(
+        user_id=profile_user.id,
+        status="watchlist"
+    ).count()
+
+    watching_count = UserSeries.query.filter_by(
+        user_id=profile_user.id,
+        status="watching"
+    ).count()
+
+    completed_count = UserSeries.query.filter_by(
+        user_id=profile_user.id,
+        status="completed"
+    ).count()
+
+    poster_paths = {}
+
+    for review in recent_reviews:
+        if review.series_id not in poster_paths:
+            series = get_show_details(review.series_id)
+            poster_paths[review.series_id] = series.get("poster_path")
+
+    return render_template(
+        "friendprofile.html",
+        profile_user=profile_user,
+        user=g.user,
+        recent_reviews=recent_reviews,
+        review_count=review_count,
+        watchlist_count=watchlist_count,
+        watching_count=watching_count,
+        completed_count=completed_count,
+        poster_paths=poster_paths
+    )
+    
 @app.route("/library")
 @login_required
 def library():
@@ -374,14 +459,130 @@ def community():
 @app.route("/friends")
 @login_required
 def friends():
-    return render_template("friends.html", user=g.user)
+    friendships = Friendship.query.filter_by(
+        user_id=g.user.id
+    ).all()
 
+    friends = []
+
+    for friendship in friendships:
+        friend = friendship.friend
+
+        latest_review = EpisodeReview.query.filter_by(
+            user_id=friend.id
+        ).order_by(
+            EpisodeReview.created_at.desc()
+        ).first()
+
+        watching = UserSeries.query.filter_by(
+            user_id=friend.id,
+            status="watching"
+        ).first()
+
+        friends.append({
+            "user": friend,
+            "latest_review": latest_review,
+            "watching": watching
+        })
+
+    friend_count = len(friends)
+
+    shared_reviews_count = 0
+    for item in friends:
+        shared_reviews_count += EpisodeReview.query.filter_by(
+            user_id=item["user"].id
+        ).count()
+
+    # Search users to add as friends
+    q = request.args.get("q", "").strip()
+    search_results = []
+
+    if q:
+        current_friend_ids = [item["user"].id for item in friends]
+
+        search_results = User.query.filter(
+            User.username.ilike(f"%{q}%"),
+            User.id != g.user.id,
+            ~User.id.in_(current_friend_ids) if current_friend_ids else True
+        ).limit(10).all()
+
+    return render_template(
+        "friends.html",
+        user=g.user,
+        friends=friends,
+        friend_count=friend_count,
+        shared_reviews_count=shared_reviews_count,
+        q=q,
+        search_results=search_results
+    )
+    
+@app.route("/friends/add/<username>", methods=["POST"])
+@login_required
+def add_friend(username):
+    friend = User.query.filter_by(username=username).first_or_404()
+
+    if friend.id == g.user.id:
+        flash("You cannot add yourself as a friend.", "error")
+        return redirect(url_for("friends"))
+
+    existing = Friendship.query.filter_by(
+        user_id=g.user.id,
+        friend_id=friend.id
+    ).first()
+
+    if existing:
+        flash("This user is already your friend.", "error")
+        return redirect(url_for("friends"))
+
+    friendship = Friendship(
+        user_id=g.user.id,
+        friend_id=friend.id
+    )
+
+    db.session.add(friendship)
+    db.session.commit()
+
+    flash(f"{friend.username} added as a friend.", "success")
+    return redirect(url_for("friends"))
+
+
+@app.route("/friends/remove/<username>", methods=["POST"])
+@login_required
+def remove_friend(username):
+    friend = User.query.filter_by(username=username).first_or_404()
+
+    friendship = Friendship.query.filter_by(
+        user_id=g.user.id,
+        friend_id=friend.id
+    ).first_or_404()
+
+    db.session.delete(friendship)
+    db.session.commit()
+
+    flash(f"{friend.username} removed from friends.", "success")
+    return redirect(url_for("friends"))
 
 @app.route("/settings")
 @login_required
 def settings():
     return render_template("settings.html", user=g.user)
 
+@app.route("/settings/delete-account", methods=["POST"])
+@login_required
+def delete_account():
+    user = User.query.get(g.user.id)
+
+    if user is None:
+        flash("User not found.", "error")
+        return redirect(url_for("settings"))
+
+    session.clear()
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("Your account has been deleted.", "success")
+    return redirect(url_for("landing"))
 
 # -------------------- SERIES --------------------
 

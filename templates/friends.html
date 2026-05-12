@@ -6,37 +6,82 @@
 
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
+
   <div class="hero-text">
     <h2>Friends Activity</h2>
-    <p>Track what your friends are watching, sharing, rating, and recommending.</p>
+    <p>Track what your friends are watching, reviewing, and recommending.</p>
+
     <div class="hero-actions">
-      <button class="btn-primary">Add friends</button>
-      <button class="btn-ghost">View recommendations</button>
+      <a href="{{ url_for('community') }}" class="btn-primary">Find friends</a>
+      <a href="{{ url_for('profile') }}" class="btn-ghost">My profile</a>
     </div>
   </div>
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">23</div>
+      <div class="hero-stat-n">{{ friend_count }}</div>
       <div class="hero-stat-l">Friends</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">87</div>
-      <div class="hero-stat-l">Shared Reviews</div>
+      <div class="hero-stat-n">{{ shared_reviews_count }}</div>
+      <div class="hero-stat-l">Friend Reviews</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">14</div>
-      <div class="hero-stat-l">Recommendations</div>
+      <div class="hero-stat-n">{{ friends|length }}</div>
+      <div class="hero-stat-l">Profiles</div>
     </div>
   </div>
 </div>
 
 <div class="filter-row">
   <span class="filter-label">Filter</span>
-  <div class="chip active" onclick="toggleChip(this)">Recent</div>
-  <div class="chip" onclick="toggleChip(this)">Watching</div>
-  <div class="chip" onclick="toggleChip(this)">Reviews</div>
-  <div class="chip" onclick="toggleChip(this)">Recommendations</div>
+  <div class="chip active">Friends</div>
+  <div class="chip">Reviews</div>
+  <div class="chip">Watching</div>
+</div>
+
+<div class="friend-search-panel">
+  <form class="friend-search-form" method="get" action="{{ url_for('friends') }}">
+    <input
+      type="text"
+      name="q"
+      value="{{ q or '' }}"
+      placeholder="Search users by username..."
+    >
+    <button type="submit" class="btn-primary">Search</button>
+  </form>
+
+  {% if q %}
+    <div class="friend-search-results">
+
+      {% if search_results %}
+        {% for result in search_results %}
+          <div class="continue-item friend-search-result">
+            <div class="ci-poster p{{ loop.index }}">{{ result.username[:2] | upper }}</div>
+
+            <div class="ci-body">
+              <div class="ci-title">{{ result.username }}</div>
+              <div class="ci-sub">User profile</div>
+            </div>
+
+            <form method="post" action="{{ url_for('add_friend', username=result.username) }}">
+              <button type="submit" class="btn-primary">Add friend</button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="profile-side-card">
+          <div class="section-title">No users found</div>
+          <p class="profile-muted-text">
+            No users matched "{{ q }}", or they are already your friend.
+          </p>
+        </div>
+      {% endif %}
+
+    </div>
+  {% endif %}
 </div>
 
 <div class="section-header mt-4">
@@ -46,55 +91,50 @@
 
 <div class="continue-list">
 
-  <div class="continue-item">
-    <div class="ci-poster p1">JD</div>
+  {% if friends %}
+
+  {% for item in friends %}
+  {% set friend = item.user %}
+  {% set latest_review = item.latest_review %}
+  {% set watching = item.watching %}
+
+  <a class="continue-item friend-row-link" href="{{ url_for('public_profile', username=friend.username) }}">
+    <div class="ci-poster p{{ loop.index }}">{{ friend.username[:2] | upper }}</div>
+
     <div class="ci-body">
-      <div class="ci-title">Jane Doe</div>
-      <div class="ci-sub">Currently watching Severance</div>
-      <div class="ci-ep">Recommended: Silo</div>
+      <div class="ci-title">{{ friend.username }}</div>
+
+      {% if watching %}
+      <div class="ci-sub">Currently watching {{ watching.name }}</div>
+      {% else %}
+      <div class="ci-sub">No current watching status</div>
+      {% endif %}
+
+      {% if latest_review %}
+      <div class="ci-ep">
+        Reviewed {{ latest_review.series_name }} —
+        {{ latest_review.rating }}/5
+      </div>
+      {% else %}
+      <div class="ci-ep">No reviews yet</div>
+      {% endif %}
     </div>
-    <span class="badge badge-watching">Online</span>
+
+    <span class="badge badge-watching">View profile</span>
+  </a>
+
+  {% endfor %}
+
+  {% else %}
+
+  <div class="profile-side-card">
+    <div class="section-title">No friends yet</div>
+    <p class="profile-muted-text">
+      Add users as friends so you can see their profiles and reviews here.
+    </p>
   </div>
 
-  <div class="continue-item">
-    <div class="ci-poster p2">MS</div>
-    <div class="ci-body">
-      <div class="ci-title">Mike Smith</div>
-      <div class="ci-sub">Finished White Lotus</div>
-      <div class="ci-ep">Rated ★★★★★</div>
-    </div>
-    <span class="badge badge-finished">Active</span>
-  </div>
-
-  <div class="continue-item">
-    <div class="ci-poster p3">AR</div>
-    <div class="ci-body">
-      <div class="ci-title">Alex Rivers</div>
-      <div class="ci-sub">Started Dune: Prophecy</div>
-      <div class="ci-ep">Shared review yesterday</div>
-    </div>
-    <span class="badge badge-new">New</span>
-  </div>
-
-  <div class="continue-item">
-    <div class="ci-poster p4">LT</div>
-    <div class="ci-body">
-      <div class="ci-title">Lisa Tran</div>
-      <div class="ci-sub">Watching The Bear</div>
-      <div class="ci-ep">Suggested: Fallout</div>
-    </div>
-    <span class="badge badge-watching">Online</span>
-  </div>
-
-  <div class="continue-item">
-    <div class="ci-poster p5">RK</div>
-    <div class="ci-body">
-      <div class="ci-title">Ryan Kim</div>
-      <div class="ci-sub">Completed Andor</div>
-      <div class="ci-ep">Top score: 9.8/10</div>
-    </div>
-    <span class="badge badge-finished">Top</span>
-  </div>
+  {% endif %}
 
 </div>
 

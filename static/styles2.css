@@ -1980,3 +1980,39 @@ select,
 .episode-review-actions .delete-review-btn {
   height: 36px;
 }
+
+.friend-search-panel {
+  margin-bottom: 24px;
+}
+
+.friend-search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.friend-search-form input {
+  flex: 1;
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+}
+
+.friend-search-form input:focus {
+  outline: none;
+  border-color: var(--p600);
+}
+
+.friend-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.friend-search-result form {
+  margin-left: auto;
+}
