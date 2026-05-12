@@ -2016,3 +2016,220 @@ select,
 .friend-search-result form {
   margin-left: auto;
 }
+.btn-priority {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pin-icon {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  fill: transparent;
+  flex-shrink: 0;
+}
+
+.btn-priority:hover {
+  border-color: rgba(212, 168, 75, 0.5);
+  color: #D4A84B;
+  background: rgba(212, 168, 75, 0.08);
+}
+
+.btn-priority.active {
+  color: #D4A84B;
+  background: rgba(212, 168, 75, 0.16);
+  border-color: rgba(212, 168, 75, 0.45);
+}
+
+.btn-priority.active .pin-icon {
+  fill: currentColor;
+}
+
+.badge-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(212, 168, 75, 0.16);
+  color: #D4A84B;
+  border: 1px solid rgba(212, 168, 75, 0.45);
+}
+
+.badge-priority .pin-icon {
+  fill: currentColor;
+}
+
+.pin-icon-small {
+  width: 11px;
+  height: 11px;
+}
+/* WATCHLIST PRIORITY CARD STYLE */
+
+.watchlist-card {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  cursor: default;
+}
+
+.watchlist-card .series-card-link {
+  display: block;
+}
+
+.watchlist-card .poster {
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.watchlist-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 4;
+}
+
+.watchlist-notch {
+  margin: 0;
+}
+
+.priority-pin-form {
+  margin: 0;
+}
+
+.btn-priority-pin {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(12, 12, 20, 0.86);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.btn-priority-pin:hover {
+  border-color: rgba(212, 168, 75, 0.55);
+  color: #D4A84B;
+  background: rgba(212, 168, 75, 0.08);
+  transform: translateY(-1px);
+}
+
+.btn-priority-pin .pin-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  fill: transparent;
+}
+
+.btn-priority-pin.active {
+  color: #D4A84B;
+  border-color: rgba(212, 168, 75, 0.6);
+  background: rgba(212, 168, 75, 0.18);
+}
+
+.btn-priority-pin.active .pin-icon {
+  fill: currentColor;
+}
+
+.watchlist-card.priority-card {
+  border-color: rgba(212, 168, 75, 0.8);
+  box-shadow: 0 0 22px rgba(212, 168, 75, 0.16);
+}
+
+.watchlist-card.priority-card:hover {
+  border-color: rgba(212, 168, 75, 1);
+}
+
+.watchlist-hidden {
+  display: none !important;
+}
+/* LIBRARY FAVOURITE STAR */
+
+.library-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 4;
+}
+
+.library-card-top .status-notch {
+  margin-bottom: 0;
+}
+
+.favourite-toggle-form {
+  margin: 0;
+}
+
+.favourite-toggle-btn,
+.favourite-static-star {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(12, 12, 20, 0.86);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.favourite-toggle-btn:hover {
+  border-color: rgba(212, 168, 75, 0.55);
+  color: var(--yellow);
+  background: rgba(212, 168, 75, 0.08);
+  transform: translateY(-1px);
+}
+
+.favourite-toggle-btn.is-favourite,
+.favourite-static-star {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.6);
+  background: rgba(212, 168, 75, 0.18);
+}
+
+.favourite-static-star {
+  cursor: default;
+}
+
+.favourite-readonly-card {
+  cursor: default;
+}
+
+.favourite-readonly-card .series-card-link {
+  display: block;
+}
+
+.profile-favourites-grid .library-card {
+  min-width: 0;
+}
+
+.profile-favourites-grid .poster {
+  height: 180px;
+}

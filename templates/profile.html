@@ -36,17 +36,17 @@
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">47</div>
+      <div class="hero-stat-n">{{ completed_count }}</div>
       <div class="hero-stat-l">Finished</div>
     </div>
 
     <div class="hero-stat">
-      <div class="hero-stat-n">8</div>
+      <div class="hero-stat-n">{{ watching_count }}</div>
       <div class="hero-stat-l">Watching</div>
     </div>
 
     <div class="hero-stat">
-      <div class="hero-stat-n">312</div>
+      <div class="hero-stat-n">{{ episodes_tracked_count }}</div>
       <div class="hero-stat-l">Episodes</div>
     </div>
   </div>
@@ -79,14 +79,78 @@
     <section class="profile-block">
       <div class="section-header">
         <span class="section-title">Favourite series</span>
-        <span class="see-all">Edit</span>
+        <a href="{{ url_for('favourites') }}" class="see-all">View all</a>
       </div>
 
       <div class="profile-favourites-grid">
+
+        {% if favourite_items %}
+
+        {% for show in favourite_items %}
+
+        <div class="card library-card favourite-readonly-card status-{{ show.status }}">
+
+          <div class="library-card-top">
+            <div class="status-notch">
+              {{ show.status.replace('_', ' ').title() }}
+            </div>
+
+            <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+              <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+              <button type="submit" class="favourite-toggle-btn is-favourite" title="Remove from favourites"
+                aria-label="Remove from favourites">
+                <i class="fa-solid fa-star"></i>
+              </button>
+            </form>
+          </div>
+
+          <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+            {% if show.poster_path %}
+            <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+            </div>
+            {% else %}
+            <div class="poster p1">{{ show.name[:1] }}</div>
+            {% endif %}
+          </a>
+
+          <div class="card-body">
+            <div class="card-title">{{ show.name }}</div>
+
+            <div class="card-sub">
+              {% if show.genres %}
+              {{ show.genres.split(',')[0] }}
+              {% else %}
+              No genre
+              {% endif %}
+
+              <div class="stars">⭐ {{ show.vote_average }}</div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" style="
+              width:
+              {% if show.status == 'completed' %}100%
+              {% elif show.status == 'watching' %}50%
+              {% elif show.status == 'on_hold' %}30%
+              {% else %}0%
+              {% endif %}
+            "></div>
+            </div>
+          </div>
+
+        </div>
+
+        {% endfor %}
+
+        {% for i in range(4 - favourite_items|length) %}
         <div class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
         </div>
+        {% endfor %}
+
+        {% else %}
 
         <div class="profile-empty-favourite">
           <span>+</span>
@@ -102,9 +166,16 @@
           <span>+</span>
           <p>Add favourite</p>
         </div>
+
+        <div class="profile-empty-favourite">
+          <span>+</span>
+          <p>Add favourite</p>
+        </div>
+
+        {% endif %}
+
       </div>
     </section>
-
 
     <!-- Recent Activity -->
     <section class="profile-block">
@@ -238,12 +309,12 @@
 
       <div class="profile-stat-row">
         <span>Series watched</span>
-        <strong>47</strong>
+        <strong>{{ completed_count }}</strong>
       </div>
 
       <div class="profile-stat-row">
         <span>Episodes tracked</span>
-        <strong>312</strong>
+        <strong>{{ episodes_tracked_count }}</strong>
       </div>
 
       <div class="profile-stat-row">

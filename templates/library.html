@@ -66,8 +66,20 @@
 
   <div class="card library-card status-{{ show.status }}">
 
-    <div class="status-notch">
-      {{ show.status.replace('_', ' ').title() }}
+    <div class="library-card-top">
+      <div class="status-notch">
+        {{ show.status.replace('_', ' ').title() }}
+      </div>
+
+      <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <button type="submit" class="favourite-toggle-btn {% if show.tmdb_id in favourite_ids %}is-favourite{% endif %}"
+          title="{% if show.tmdb_id in favourite_ids %}Remove from favourites{% else %}Add to favourites{% endif %}"
+          aria-label="{% if show.tmdb_id in favourite_ids %}Remove from favourites{% else %}Add to favourites{% endif %}">
+          <i class="{% if show.tmdb_id in favourite_ids %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+        </button>
+      </form>
     </div>
 
     <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
@@ -79,9 +91,9 @@
 
       <div class="card-sub">
         {% if show.genres %}
-          {{ show.genres.split(',')[0] }}
+        {{ show.genres.split(',')[0] }}
         {% else %}
-          No genre
+        No genre
         {% endif %}
 
         <div class="stars">⭐ {{ show.vote_average }}</div>
@@ -102,23 +114,23 @@
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <select name="status" class="status-select" onchange="this.form.submit()">
-          <option value="watching" {% if show.status == 'watching' %}selected{% endif %}>
+          <option value="watching" {% if show.status=='watching' %}selected{% endif %}>
             Watching
           </option>
 
-          <option value="completed" {% if show.status == 'completed' %}selected{% endif %}>
+          <option value="completed" {% if show.status=='completed' %}selected{% endif %}>
             Completed
           </option>
 
-          <option value="on_hold" {% if show.status == 'on_hold' %}selected{% endif %}>
+          <option value="on_hold" {% if show.status=='on_hold' %}selected{% endif %}>
             On Hold
           </option>
 
-          <option value="dropped" {% if show.status == 'dropped' %}selected{% endif %}>
+          <option value="dropped" {% if show.status=='dropped' %}selected{% endif %}>
             Dropped
           </option>
 
-          <option value="watchlist" {% if show.status == 'watchlist' %}selected{% endif %}>
+          <option value="watchlist" {% if show.status=='watchlist' %}selected{% endif %}>
             Move to Watchlist
           </option>
         </select>
@@ -134,7 +146,7 @@
 
   {% endfor %}
   {% else %}
-    <p style="padding: 20px; font-size: 1.2rem;">Your library is empty.</p>
+  <p style="padding: 20px; font-size: 1.2rem;">Your library is empty.</p>
   {% endif %}
 
 </div>
@@ -145,14 +157,14 @@
     <span class="section-title">Genre Breakdown</span>
 
     {% if genre_stats %}
-      {% for genre, count in genre_stats.items() %}
-        <div class="stat-line">
-          <span>{{ genre }}</span>
-          <strong>{{ count }}</strong>
-        </div>
-      {% endfor %}
+    {% for genre, count in genre_stats.items() %}
+    <div class="stat-line">
+      <span>{{ genre }}</span>
+      <strong>{{ count }}</strong>
+    </div>
+    {% endfor %}
     {% else %}
-      <p class="empty-text">No genre data yet.</p>
+    <p class="empty-text">No genre data yet.</p>
     {% endif %}
   </div>
 
@@ -160,20 +172,20 @@
     <span class="section-title">Status by Genre</span>
 
     {% if status_genre_stats %}
-      {% for status, genres in status_genre_stats.items() %}
-        <div class="status-genre-block">
-          <h3>{{ status.replace('_', ' ').title() }}</h3>
+    {% for status, genres in status_genre_stats.items() %}
+    <div class="status-genre-block">
+      <h3>{{ status.replace('_', ' ').title() }}</h3>
 
-          {% for genre, count in genres.items() %}
-            <div class="stat-line">
-              <span>{{ genre }}</span>
-              <strong>{{ count }}</strong>
-            </div>
-          {% endfor %}
-        </div>
+      {% for genre, count in genres.items() %}
+      <div class="stat-line">
+        <span>{{ genre }}</span>
+        <strong>{{ count }}</strong>
+      </div>
       {% endfor %}
+    </div>
+    {% endfor %}
     {% else %}
-      <p class="empty-text">No status data yet.</p>
+    <p class="empty-text">No status data yet.</p>
     {% endif %}
   </div>
 

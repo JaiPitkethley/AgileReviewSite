@@ -320,6 +320,33 @@ def profile():
         status="watchlist"
     ).count()
 
+    completed_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="completed"
+    ).count()
+
+    watching_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watching"
+    ).count()
+
+    episodes_tracked_count = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).count()
+
+    favourite_items = (
+        db.session.query(UserSeries)
+        .join(Favourite, Favourite.tmdb_id == UserSeries.tmdb_id)
+        .filter(
+            UserSeries.user_id == g.user.id,
+            Favourite.user_id == g.user.id,
+            UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+        )
+        .order_by(Favourite.added_at.desc())
+        .limit(4)
+        .all()
+    )
+
     poster_paths = {}
 
     for review in recent_reviews:
@@ -333,9 +360,12 @@ def profile():
         recent_reviews=recent_reviews,
         review_count=review_count,
         watchlist_count=watchlist_count,
+        completed_count=completed_count,
+        watching_count=watching_count,
+        episodes_tracked_count=episodes_tracked_count,
+        favourite_items=favourite_items,
         poster_paths=poster_paths
     )
-
 @app.route("/profile/<username>")
 @login_required
 def public_profile(username):
@@ -402,6 +432,11 @@ def library():
         UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
     ).all()
 
+    favourite_ids = {
+        favourite.tmdb_id
+        for favourite in Favourite.query.filter_by(user_id=g.user.id).all()
+    }
+
     total_series = len(shows)
     completed_count = sum(1 for show in shows if show.status == "completed")
     watching_count = sum(1 for show in shows if show.status == "watching")
@@ -415,6 +450,7 @@ def library():
         "library.html",
         user=g.user,
         shows=shows,
+        favourite_ids=favourite_ids,
         total_series=total_series,
         completed_count=completed_count,
         watching_count=watching_count,
@@ -424,31 +460,96 @@ def library():
         status_genre_stats=status_genre_stats
     )
 
-
 @app.route("/watchlist")
 @login_required
 def watchlist():
     shows = UserSeries.query.filter_by(
         user_id=g.user.id,
         status="watchlist"
+    ).order_by(
+        UserSeries.priority.desc(),
+        UserSeries.added_at.desc()
     ).all()
 
-    genre_stats = get_genre_stats(shows)
+    priority_count = sum(1 for show in shows if show.priority)
 
     return render_template(
         "watchlist.html",
         shows=shows,
         user=g.user,
-        genre_stats=genre_stats
+        priority_count=priority_count
     )
-
-
+    
 @app.route("/favourites")
 @login_required
 def favourites():
-    items = Favourite.query.filter_by(user_id=g.user.id).all()
-    return render_template("favourites.html", user=g.user, favourite_items=items)
+    favourite_items = (
+        db.session.query(UserSeries)
+        .join(Favourite, Favourite.tmdb_id == UserSeries.tmdb_id)
+        .filter(
+            UserSeries.user_id == g.user.id,
+            Favourite.user_id == g.user.id,
+            UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+        )
+        .order_by(Favourite.added_at.desc())
+        .all()
+    )
 
+    ratings = [
+        show.vote_average
+        for show in favourite_items
+        if show.vote_average is not None
+    ]
+
+    avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0
+
+    return render_template(
+        "favourites.html",
+        user=g.user,
+        favourite_items=favourite_items,
+        favourite_count=len(favourite_items),
+        avg_rating=avg_rating
+    )
+
+@app.route("/favourites/toggle", methods=["POST"])
+@login_required
+def toggle_favourite():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if not tmdb_id:
+        return redirect(request.referrer or url_for("library"))
+
+    tmdb_id = int(tmdb_id)
+
+    existing_favourite = Favourite.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id
+    ).first()
+
+    if existing_favourite:
+        db.session.delete(existing_favourite)
+        db.session.commit()
+        return redirect(request.referrer or url_for("library"))
+
+    show = UserSeries.query.filter(
+        UserSeries.user_id == g.user.id,
+        UserSeries.tmdb_id == tmdb_id,
+        UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+    ).first()
+
+    if show:
+        favourite = Favourite(
+            user_id=g.user.id,
+            tmdb_id=show.tmdb_id,
+            name=show.name,
+            poster_path=show.poster_path,
+            vote_average=show.vote_average
+        )
+
+        db.session.add(favourite)
+        db.session.commit()
+
+    return redirect(request.referrer or url_for("library"))
 
 @app.route("/community")
 @login_required
@@ -732,6 +833,25 @@ def remove_from_watchlist():
 
     return redirect(request.referrer or url_for("watchlist"))
 
+@app.route("/watchlist/priority", methods=["POST"])
+@login_required
+def toggle_watchlist_priority():
+    tmdb_id = request.form.get("tmdb_id")
+
+    if not tmdb_id:
+        return redirect(request.referrer or url_for("watchlist"))
+
+    show = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=int(tmdb_id),
+        status="watchlist"
+    ).first()
+
+    if show:
+        show.priority = not show.priority
+        db.session.commit()
+
+    return redirect(request.referrer or url_for("watchlist"))
 
 @app.route("/series/status", methods=["POST"])
 @login_required

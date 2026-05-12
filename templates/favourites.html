@@ -6,131 +6,100 @@
 
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
+
   <div class="hero-text">
-    <h2>{{ user["username"] }}'s Favourites</h2>
-    <p>Your all-time top-rated series collection — the shows you truly loved.</p>
+    <h2>{{ user.username }}'s Favourites</h2>
+    <p>Your favourite series from your library, keeping their status, rating, genre, and card style.</p>
+
     <div class="hero-actions">
-      <button class="btn-primary">Rewatch favourites</button>
-      <button class="btn-ghost">Discover similar series</button>
+      <a href="{{ url_for('library') }}" class="btn-primary">Back to library</a>
+      <a href="{{ url_for('dashboard') }}" class="btn-ghost">Discover more</a>
     </div>
   </div>
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">18</div>
+      <div class="hero-stat-n">{{ favourite_count }}</div>
       <div class="hero-stat-l">Favourites</div>
     </div>
+
     <div class="hero-stat">
-      <div class="hero-stat-n">9.4</div>
+      <div class="hero-stat-n">{{ avg_rating }}</div>
       <div class="hero-stat-l">Avg Rating</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-n">124</div>
-      <div class="hero-stat-l">Rewatched Eps</div>
     </div>
   </div>
 </div>
 
-<div class="filter-row">
-  <span class="filter-label">Filter</span>
-  <div class="chip active" onclick="toggleChip(this)">All</div>
-  <div class="chip" onclick="toggleChip(this)">Drama</div>
-  <div class="chip" onclick="toggleChip(this)">Sci-Fi</div>
-  <div class="chip" onclick="toggleChip(this)">Thriller</div>
-  <div class="chip" onclick="toggleChip(this)">Comedy</div>
-</div>
-
 <div class="section-header mt-4">
-  <span class="section-title">Top Picks</span>
-  <span class="see-all">Rank by score</span>
+  <span class="section-title">Favourite Series</span>
+  <span class="see-all">Click star to remove</span>
 </div>
 
 <div class="card-grid">
 
-  <div class="card">
-    <div class="poster p1">
-      S
-      <span class="badge badge-finished">Top Rated</span>
+  {% if favourite_items %}
+
+  {% for show in favourite_items %}
+
+  <div class="card library-card favourite-readonly-card status-{{ show.status }}">
+
+    <div class="library-card-top">
+      <div class="status-notch">
+        {{ show.status.replace('_', ' ').title() }}
+      </div>
+
+      <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <button type="submit" class="favourite-toggle-btn is-favourite" title="Remove from favourites"
+          aria-label="Remove from favourites">
+          <i class="fa-solid fa-star"></i>
+        </button>
+      </form>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
+
+    <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+      {% if show.poster_path %}
+      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');"></div>
+      {% else %}
+      <div class="poster p1">{{ show.name[:1] }}</div>
+      {% endif %}
+    </a>
+
     <div class="card-body">
-      <div class="card-title">Severance</div>
+      <div class="card-title">{{ show.name }}</div>
+
       <div class="card-sub">
-        Apple TV+
-        <div class="stars">★★★★★</div>
+        {% if show.genres %}
+        {{ show.genres.split(',')[0] }}
+        {% else %}
+        No genre
+        {% endif %}
+
+        <div class="stars">⭐ {{ show.vote_average }}</div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="
+            width:
+            {% if show.status == 'completed' %}100%
+            {% elif show.status == 'watching' %}50%
+            {% elif show.status == 'on_hold' %}30%
+            {% else %}0%
+            {% endif %}
+          "></div>
       </div>
     </div>
+
   </div>
 
-  <div class="card">
-    <div class="poster p5">
-      W
-      <span class="badge badge-finished">Classic</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">White Lotus</div>
-      <div class="card-sub">
-        HBO
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+  {% endfor %}
 
-  <div class="card">
-    <div class="poster p2">
-      T
-      <span class="badge badge-finished">Loved</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">The Bear</div>
-      <div class="card-sub">
-        Hulu
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+  {% else %}
 
-  <div class="card">
-    <div class="poster p3">
-      B
-      <span class="badge badge-finished">Essential</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Black Mirror</div>
-      <div class="card-sub">
-        Netflix
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
+  <p class="empty-text">You have not favourited any library series yet.</p>
 
-  <div class="card">
-    <div class="poster p4">
-      A
-      <span class="badge badge-finished">Epic</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Andor</div>
-      <div class="card-sub">
-        Disney+
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
+  {% endif %}
 
 </div>
 
