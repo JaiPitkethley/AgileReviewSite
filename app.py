@@ -320,6 +320,20 @@ def profile():
         status="watchlist"
     ).count()
 
+    completed_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="completed"
+    ).count()
+
+    watching_count = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watching"
+    ).count()
+
+    episodes_tracked_count = EpisodeReview.query.filter_by(
+        user_id=g.user.id
+    ).count()
+
     favourite_items = (
         db.session.query(UserSeries)
         .join(Favourite, Favourite.tmdb_id == UserSeries.tmdb_id)
@@ -346,10 +360,12 @@ def profile():
         recent_reviews=recent_reviews,
         review_count=review_count,
         watchlist_count=watchlist_count,
+        completed_count=completed_count,
+        watching_count=watching_count,
+        episodes_tracked_count=episodes_tracked_count,
         favourite_items=favourite_items,
         poster_paths=poster_paths
     )
-
 @app.route("/profile/<username>")
 @login_required
 def public_profile(username):

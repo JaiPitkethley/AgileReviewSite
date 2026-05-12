@@ -32,50 +32,55 @@
 
 <div class="section-header mt-4">
   <span class="section-title">Favourite Series</span>
-  <span class="see-all">Read only</span>
+  <span class="see-all">Click star to remove</span>
 </div>
 
 <div class="card-grid">
 
   {% if favourite_items %}
 
-    {% for show in favourite_items %}
+  {% for show in favourite_items %}
 
-    <div class="card library-card favourite-readonly-card status-{{ show.status }}">
+  <div class="card library-card favourite-readonly-card status-{{ show.status }}">
 
-      <div class="library-card-top">
-        <div class="status-notch">
-          {{ show.status.replace('_', ' ').title() }}
-        </div>
-
-        <div class="favourite-static-star" title="Favourite">
-          <i class="fa-solid fa-star"></i>
-        </div>
+    <div class="library-card-top">
+      <div class="status-notch">
+        {{ show.status.replace('_', ' ').title() }}
       </div>
 
-      <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
-        {% if show.poster_path %}
-          <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');"></div>
+      <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <button type="submit" class="favourite-toggle-btn is-favourite" title="Remove from favourites"
+          aria-label="Remove from favourites">
+          <i class="fa-solid fa-star"></i>
+        </button>
+      </form>
+    </div>
+
+    <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+      {% if show.poster_path %}
+      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');"></div>
+      {% else %}
+      <div class="poster p1">{{ show.name[:1] }}</div>
+      {% endif %}
+    </a>
+
+    <div class="card-body">
+      <div class="card-title">{{ show.name }}</div>
+
+      <div class="card-sub">
+        {% if show.genres %}
+        {{ show.genres.split(',')[0] }}
         {% else %}
-          <div class="poster p1">{{ show.name[:1] }}</div>
+        No genre
         {% endif %}
-      </a>
 
-      <div class="card-body">
-        <div class="card-title">{{ show.name }}</div>
+        <div class="stars">⭐ {{ show.vote_average }}</div>
+      </div>
 
-        <div class="card-sub">
-          {% if show.genres %}
-            {{ show.genres.split(',')[0] }}
-          {% else %}
-            No genre
-          {% endif %}
-
-          <div class="stars">⭐ {{ show.vote_average }}</div>
-        </div>
-
-        <div class="progress-bar">
-          <div class="progress-fill" style="
+      <div class="progress-bar">
+        <div class="progress-fill" style="
             width:
             {% if show.status == 'completed' %}100%
             {% elif show.status == 'watching' %}50%
@@ -83,16 +88,16 @@
             {% else %}0%
             {% endif %}
           "></div>
-        </div>
       </div>
-
     </div>
 
-    {% endfor %}
+  </div>
+
+  {% endfor %}
 
   {% else %}
 
-    <p class="empty-text">You have not favourited any library series yet.</p>
+  <p class="empty-text">You have not favourited any library series yet.</p>
 
   {% endif %}
 

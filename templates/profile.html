@@ -36,17 +36,17 @@
 
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">47</div>
+      <div class="hero-stat-n">{{ completed_count }}</div>
       <div class="hero-stat-l">Finished</div>
     </div>
 
     <div class="hero-stat">
-      <div class="hero-stat-n">8</div>
+      <div class="hero-stat-n">{{ watching_count }}</div>
       <div class="hero-stat-l">Watching</div>
     </div>
 
     <div class="hero-stat">
-      <div class="hero-stat-n">312</div>
+      <div class="hero-stat-n">{{ episodes_tracked_count }}</div>
       <div class="hero-stat-l">Episodes</div>
     </div>
   </div>
@@ -95,9 +95,14 @@
               {{ show.status.replace('_', ' ').title() }}
             </div>
 
-            <div class="favourite-static-star" title="Favourite">
-              <i class="fa-solid fa-star"></i>
-            </div>
+            <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+              <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+              <button type="submit" class="favourite-toggle-btn is-favourite" title="Remove from favourites"
+                aria-label="Remove from favourites">
+                <i class="fa-solid fa-star"></i>
+              </button>
+            </form>
           </div>
 
           <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
@@ -304,12 +309,12 @@
 
       <div class="profile-stat-row">
         <span>Series watched</span>
-        <strong>47</strong>
+        <strong>{{ completed_count }}</strong>
       </div>
 
       <div class="profile-stat-row">
         <span>Episodes tracked</span>
-        <strong>312</strong>
+        <strong>{{ episodes_tracked_count }}</strong>
       </div>
 
       <div class="profile-stat-row">
