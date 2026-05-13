@@ -44,12 +44,7 @@
 
 <div class="friend-search-panel">
   <form class="friend-search-form" method="get" action="{{ url_for('friends') }}">
-    <input
-      type="text"
-      name="q"
-      value="{{ q or '' }}"
-      placeholder="Search users by username..."
-    >
+    <input type="text" name="q" value="{{ q or '' }}" placeholder="Search users by username...">
     <button type="submit" class="btn-primary">Search</button>
   </form>
 
@@ -81,7 +76,21 @@
         </div>
       {% endif %}
 
+      <form method="post" action="{{ url_for('add_friend', username=result.username) }}">
+        <button type="submit" class="btn-primary">Add friend</button>
+      </form>
     </div>
+    {% endfor %}
+    {% else %}
+    <div class="profile-side-card">
+      <div class="section-title">No users found</div>
+      <p class="profile-muted-text">
+        No users matched "{{ q }}", or they are already your friend.
+      </p>
+    </div>
+    {% endif %}
+
+  </div>
   {% endif %}
 </div>
 
@@ -99,30 +108,39 @@
   {% set latest_review = item.latest_review %}
   {% set watching = item.watching %}
 
-  <a class="continue-item friend-row-link" href="{{ url_for('public_profile', username=friend.username) }}">
-    <div class="ci-poster p{{ loop.index }}">{{ friend.username[:2] | upper }}</div>
+  <div class="continue-item friend-row">
 
-    <div class="ci-body">
-      <div class="ci-title">{{ friend.username }}</div>
+    <a class="friend-row-main" href="{{ url_for('public_profile', username=friend.username) }}">
+      <div class="ci-poster p{{ loop.index }}">{{ friend.username[:2] | upper }}</div>
 
-      {% if watching %}
-      <div class="ci-sub">Currently watching {{ watching.name }}</div>
-      {% else %}
-      <div class="ci-sub">No current watching status</div>
-      {% endif %}
+      <div class="ci-body">
+        <div class="ci-title">{{ friend.username }}</div>
 
-      {% if latest_review %}
-      <div class="ci-ep">
-        Reviewed {{ latest_review.series_name }} —
-        {{ latest_review.rating }}/5
+        {% if watching %}
+        <div class="ci-sub">Currently watching {{ watching.name }}</div>
+        {% else %}
+        <div class="ci-sub">No current watching status</div>
+        {% endif %}
+
+        {% if latest_review %}
+        <div class="ci-ep">
+          Reviewed {{ latest_review.series_name }} —
+          {{ latest_review.rating }}/5
+        </div>
+        {% else %}
+        <div class="ci-ep">No reviews yet</div>
+        {% endif %}
       </div>
-      {% else %}
-      <div class="ci-ep">No reviews yet</div>
-      {% endif %}
-    </div>
 
-    <span class="badge badge-watching">View profile</span>
-  </a>
+      <span class="badge badge-watching">View profile</span>
+    </a>
+
+    <button type="button" class="btn-ghost friend-remove-btn"
+      onclick="openRemoveFriendModal('{{ friend.username }}', '{{ url_for('remove_friend', username=friend.username) }}')">
+      Remove
+    </button>
+
+  </div>
 
   {% endfor %}
 
@@ -138,5 +156,55 @@
   {% endif %}
 
 </div>
+
+<div id="removeFriendModal" class="app-modal-backdrop hidden">
+  <div class="app-modal">
+    <div class="app-modal-icon">!</div>
+
+    <div class="app-modal-body">
+      <h3>Remove friend?</h3>
+      <p>
+        Are you sure you want to remove
+        <strong id="removeFriendName"></strong>
+        from your friends list?
+      </p>
+    </div>
+
+    <div class="app-modal-actions">
+      <button type="button" class="btn-ghost" onclick="closeRemoveFriendModal()">
+        Cancel
+      </button>
+
+      <form id="removeFriendForm" method="post">
+        <button type="submit" class="btn-danger">
+          Remove friend
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openRemoveFriendModal(username, actionUrl) {
+    const modal = document.getElementById("removeFriendModal");
+    const name = document.getElementById("removeFriendName");
+    const form = document.getElementById("removeFriendForm");
+
+    name.textContent = username;
+    form.action = actionUrl;
+    modal.classList.remove("hidden");
+  }
+
+  function closeRemoveFriendModal() {
+    const modal = document.getElementById("removeFriendModal");
+    modal.classList.add("hidden");
+  }
+
+  document.getElementById("removeFriendModal").addEventListener("click", function (event) {
+    if (event.target === this) {
+      closeRemoveFriendModal();
+    }
+  });
+</script>
 
 {% endblock %}
