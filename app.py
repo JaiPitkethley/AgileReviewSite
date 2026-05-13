@@ -12,6 +12,9 @@ import requests
 from dotenv import load_dotenv
 import os
 
+from flask_wtf import CSRFProtect
+
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,6 +25,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(DATABASE)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+csrf = CSRFProtect(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

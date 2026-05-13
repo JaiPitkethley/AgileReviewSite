@@ -45,6 +45,7 @@
       </div>
 
       <form class="review-write-form" method="post" action="/reviews/add">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <input type="hidden" name="series_id" value="{{ series_id }}">
         <input type="hidden" name="series_name" value="{{ series.name }}">

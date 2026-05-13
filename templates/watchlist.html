@@ -61,6 +61,7 @@
       <span class="status-notch watchlist-notch">Saved</span>
 
       <form action="/watchlist/priority" method="POST" class="priority-pin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <button class="btn-priority-pin {% if show.priority %}active{% endif %}" type="submit"
@@ -93,6 +94,7 @@
       </div>
 
       <form action="/series/status" method="POST" class="status-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <select name="status" class="status-select" onchange="this.form.submit()">
@@ -105,6 +107,7 @@
       </form>
 
       <form action="/watchlist/remove" method="POST" class="remove-watchlist-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
         <button class="btn-ghost" type="submit">Remove</button>
       </form>
