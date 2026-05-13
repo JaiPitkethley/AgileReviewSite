@@ -9,11 +9,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import requests
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE = BASE_DIR / "users.db"
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "change-this-before-sharing"
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(DATABASE)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -21,8 +26,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-TMDB_API_KEY = "ac9052cb2ef122c333a96cb6540a5e2b"
-TMDB_READ_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhYzkwNTJjYjJlZjEyMmMzMzNhOTZjYjY1NDBhNWUyYiIsIm5iZiI6MTc3NDU5OTgwNy4wOTYsInN1YiI6IjY5YzYzZTdmMDJhY2FmNTM5YzAzZDQyZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l1ow7B1d7yYGAlicNMAO6ucy-aTdspSkExaF49KDmFU"
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+TMDB_READ_TOKEN = os.getenv("TMDB_READ_TOKEN")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 
