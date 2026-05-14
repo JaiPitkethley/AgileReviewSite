@@ -563,7 +563,30 @@ def toggle_favourite():
 @app.route("/community")
 @login_required
 def community():
-    return render_template("community.html", user=g.user)
+    friend_ids = db.session.query(Friendship.friend_id).filter_by(
+        user_id=g.user.id
+    ).subquery()
+
+    friend_reviews = (
+        db.session.query(EpisodeReview, User)
+        .join(User, EpisodeReview.user_id == User.id)
+        .filter(EpisodeReview.user_id.in_(friend_ids))
+        .order_by(EpisodeReview.created_at.desc())
+        .all()
+    )
+
+    poster_paths = {}
+    for review, user in friend_reviews:
+        if review.series_id not in poster_paths:
+            series = get_show_details(review.series_id)
+            poster_paths[review.series_id] = series.get("poster_path")
+
+    return render_template(
+        "community.html",
+        user=g.user,
+        friend_reviews=friend_reviews,
+        poster_paths=poster_paths
+    )
 
 
 @app.route("/friends")
