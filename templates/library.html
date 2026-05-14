@@ -72,6 +72,7 @@
       </div>
 
       <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <button type="submit" class="favourite-toggle-btn {% if show.tmdb_id in favourite_ids %}is-favourite{% endif %}"
@@ -111,6 +112,7 @@
       </div>
 
       <form action="/series/status" method="POST" class="status-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <select name="status" class="status-select" onchange="this.form.submit()">
@@ -137,6 +139,7 @@
       </form>
 
       <form action="/watchlist/remove" method="POST" class="remove-watchlist-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
         <button class="btn-ghost" type="submit">Remove</button>
       </form>

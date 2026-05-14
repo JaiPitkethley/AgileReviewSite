@@ -49,17 +49,32 @@
   </form>
 
   {% if q %}
-  <div class="friend-search-results">
+    <div class="friend-search-results">
 
-    {% if search_results %}
-    {% for result in search_results %}
-    <div class="continue-item friend-search-result">
-      <div class="ci-poster p{{ loop.index }}">{{ result.username[:2] | upper }}</div>
+      {% if search_results %}
+        {% for result in search_results %}
+          <div class="continue-item friend-search-result">
+            <div class="ci-poster p{{ loop.index }}">{{ result.username[:2] | upper }}</div>
 
-      <div class="ci-body">
-        <div class="ci-title">{{ result.username }}</div>
-        <div class="ci-sub">User profile</div>
-      </div>
+            <div class="ci-body">
+              <div class="ci-title">{{ result.username }}</div>
+              <div class="ci-sub">User profile</div>
+            </div>
+
+            <form method="post" action="{{ url_for('add_friend', username=result.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-primary">Add friend</button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="profile-side-card">
+          <div class="section-title">No users found</div>
+          <p class="profile-muted-text">
+            No users matched "{{ q }}", or they are already your friend.
+          </p>
+        </div>
+      {% endif %}
 
       <form method="post" action="{{ url_for('add_friend', username=result.username) }}">
         <button type="submit" class="btn-primary">Add friend</button>

@@ -201,6 +201,7 @@
         <p>Permanently delete your account and all tracking data.</p>
         <form method="post" action="{{ url_for('delete_account') }}"
           onsubmit="return confirm('Are you sure? This will permanently delete your account and all tracking data.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit">Delete Account</button>
         </form>
       </div>

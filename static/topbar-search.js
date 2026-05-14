@@ -141,6 +141,8 @@ document.addEventListener("click", async function (e) {
   const isAdded = button.textContent.trim() === "Added";
 
   const formData = new FormData();
+  const csrfToken = document.getElementById("global-csrf-token").value;
+  formData.append("csrf_token", csrfToken);
   formData.append("tmdb_id", seriesId);
 
   const url = isAdded ? "/watchlist/remove" : "/watchlist/add";
@@ -148,7 +150,8 @@ document.addEventListener("click", async function (e) {
   try {
     const response = await fetch(url, {
       method: "POST",
-      body: formData
+      body: formData,
+      credentials: "include"
     });
 
     if (!response.ok) {

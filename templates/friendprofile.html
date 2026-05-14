@@ -17,6 +17,7 @@
 
             {% if profile_user.id != g.user.id %}
             <form method="post" action="{{ url_for('remove_friend', username=profile_user.username) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn-ghost profile-small-btn">
                     Remove friend
                 </button>

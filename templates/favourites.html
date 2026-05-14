@@ -49,6 +49,7 @@
       </div>
 
       <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
         <button type="submit" class="favourite-toggle-btn is-favourite" title="Remove from favourites"

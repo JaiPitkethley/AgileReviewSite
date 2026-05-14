@@ -67,6 +67,7 @@
 
         {% if user_review %}
         <form method="post" action="/reviews/{{ user_review.id }}/delete" class="episode-delete-review-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="delete-review-btn">
             Delete Review
           </button>
