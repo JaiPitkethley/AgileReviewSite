@@ -577,6 +577,10 @@ def friends():
 
     for friendship in friendships:
         friend = friendship.friend
+        
+        if friend is None:
+           db.session.delete(friendship)
+           continue
 
         latest_review = EpisodeReview.query.filter_by(
             user_id=friend.id
@@ -594,7 +598,7 @@ def friends():
             "latest_review": latest_review,
             "watching": watching
         })
-
+    db.session.commit()
     friend_count = len(friends)
 
     shared_reviews_count = 0
@@ -687,6 +691,13 @@ def delete_account():
         return redirect(url_for("settings"))
 
     session.clear()
+    
+    Friendship.query.filter(
+        db.or_(
+           Friendship.user_id == user.id,
+           Friendship.friend_id == user.id
+       )
+    ).delete(synchronize_session=False)
 
     db.session.delete(user)
     db.session.commit()
