@@ -2351,3 +2351,82 @@ select,
     transform: translateY(0) scale(1);
   }
 }
+
+/* ---------------- watchlist card: pin + remove buttons ---------------- */
+
+/* ensure card can position absolute children */
+.watchlist-card{
+  position:relative;
+}
+
+/* top action bar (pin left, x right) */
+.card-top-actions{
+  position:absolute;
+  top:8px;
+  left:8px;
+  right:8px;
+  display:flex;
+  justify-content:space-between;
+  z-index:5;
+  pointer-events:none;
+}
+
+.card-top-actions form{
+  pointer-events:auto;
+}
+
+/* shared button style for both pin + x */
+.action-btn{
+  width:28px;
+  height:28px;
+  border-radius:var(--radius-md);
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+/* light mode override */
+body.light-mode .action-btn{
+  background:#ffffff;
+  border-color:var(--border);
+}
+
+/* hover */
+.action-btn:hover{
+  border-color:var(--p600);
+}
+
+/* pin icon */
+.btn-priority-pin .pin-icon{
+  width:16px;
+  height:16px;
+  fill:var(--text2);
+  transition:fill 0.15s;
+}
+
+/* active pin = gold */
+.btn-priority-pin.active .pin-icon{
+  fill:var(--yellow);
+}
+
+/* remove x button */
+.remove-x-btn{
+  font-size:16px;
+  font-weight:700;
+  color:var(--text2);
+  line-height:1;
+}
+
+.remove-x-btn:hover{
+  color:var(--red);
+  border-color:var(--red);
+}
+
+.watchlist-card{
+  position:relative;
+  padding-top: 44px;
+}

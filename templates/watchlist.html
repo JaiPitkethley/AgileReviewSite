@@ -9,11 +9,10 @@
 
   <div class="hero-text">
     <h2>{{ user.username }}'s Watchlist</h2>
-    <p>Your saved upcoming series, recommendations, and future binge queue.</p>
+    <p>Your saved series and future binge queue.</p>
 
     <div class="hero-actions">
-      <button class="btn-primary">Start watching</button>
-      <button class="btn-ghost">Browse recommendations</button>
+      <a href="{{ url_for('dashboard') }}" class="btn-primary">Browse recommendations</a>
     </div>
   </div>
 
@@ -30,54 +29,77 @@
   </div>
 </div>
 
+{% if shows %}
+<!-- Sorting -->
 <div class="filter-row">
+  <span class="filter-label">Sort by</span>
+
+  <a href="{{ url_for('watchlist', sort='recent') }}"
+     class="chip {% if sort == 'recent' %}active{% endif %}">
+     Recently added
+  </a>
+
+  <a href="{{ url_for('watchlist', sort='az') }}"
+     class="chip {% if sort == 'az' %}active{% endif %}">
+     A → Z
+  </a>
+
+  <a href="{{ url_for('watchlist', sort='za') }}"
+     class="chip {% if sort == 'za' %}active{% endif %}">
+     Z → A
+  </a>
+
+  <a href="{{ url_for('watchlist', sort='rating') }}"
+     class="chip {% if sort == 'rating' %}active{% endif %}">
+     Rating
+  </a>
+</div>
+
+<!-- Priority Filter -->
+<div class="filter-row" style="margin-top: 10px;">
   <span class="filter-label">Filter</span>
   <div class="chip active" onclick="filterWatchlist(this, 'all')">All</div>
   <div class="chip" onclick="filterWatchlist(this, 'priority')">Priority</div>
 </div>
 
-{% if request.args.get('q') %}
-<div class="section-header mt-4" id="searchResultsHeader">
-  <span class="section-title">Search Results for "{{ request.args.get('q') }}"</span>
-</div>
-
-<div id="topbarSearchResults" class="card-grid"></div>
-{% endif %}
-
 <div class="section-header mt-4">
   <span class="section-title">Saved Series</span>
-  <span class="see-all">Manage all</span>
 </div>
 
 <div class="card-grid">
 
-  {% if shows %}
   {% for show in shows %}
-
   <div class="card watchlist-card {% if show.priority %}priority-card{% endif %}"
-    data-priority="{% if show.priority %}true{% else %}false{% endif %}">
+       data-priority="{{ 'true' if show.priority else 'false' }}">
 
-    <div class="watchlist-card-top">
-      <span class="status-notch watchlist-notch">Saved</span>
+    <!-- Top Action Bar -->
+    <div class="card-top-actions">
 
-      <form action="/watchlist/priority" method="POST" class="priority-pin-form">
+      <!-- Priority Pin -->
+      <form action="/watchlist/priority" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
-        <button class="btn-priority-pin {% if show.priority %}active{% endif %}" type="submit"
-          title="{% if show.priority %}Unpin priority{% else %}Pin as priority{% endif %}"
-          aria-label="{% if show.priority %}Unpin priority{% else %}Pin as priority{% endif %}">
-
-          <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <button class="action-btn btn-priority-pin {% if show.priority %}active{% endif %}" type="submit">
+          <svg class="pin-icon" viewBox="0 0 24 24">
             <path d="M9 4h6v2l-1.5 1.5v4.2l3.2 3.2V17H13v5h-2v-5H7.3v-2.1l3.2-3.2V7.5L9 6V4Z"></path>
           </svg>
-
         </button>
       </form>
+
+      <!-- Remove X -->
+      <form action="/watchlist/remove" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+        <button class="action-btn remove-x-btn" type="submit">✕</button>
+      </form>
+
     </div>
 
     <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
-      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+      <div class="poster"
+           style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
       </div>
     </a>
 
@@ -105,27 +127,32 @@
           <option value="dropped">Dropped</option>
         </select>
       </form>
-
-      <form action="/watchlist/remove" method="POST" class="remove-watchlist-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
-        <button class="btn-ghost" type="submit">Remove</button>
-      </form>
     </div>
 
   </div>
-
   {% endfor %}
-  {% else %}
-  <p style="padding: 20px; font-size: 1.2rem;">Your watchlist is empty.</p>
-  {% endif %}
 
 </div>
+
+{% else %}
+<!-- EMPTY STATE -->
+<div class="profile-side-card" style="margin-top: 20px; text-align: center;">
+  <div class="section-title">Your watchlist is empty</div>
+
+  <p class="profile-muted-text">
+    Add shows from the 
+    <a href="{{ url_for('dashboard') }}" class="btn-ghost" style="padding: 4px 10px; font-size: 0.9rem;">
+      Discover page
+    </a>
+    to start building your watchlist.
+  </p>
+</div>
+{% endif %}
 
 <script>
   function filterWatchlist(clickedChip, filterType) {
     const chips = document.querySelectorAll(".filter-row .chip");
-    const cards = document.querySelectorAll(".watchlist-card");
+    const cards = documeant.querySelectorAll(".watchlist-card");
 
     chips.forEach(chip => chip.classList.remove("active"));
     clickedChip.classList.add("active");
