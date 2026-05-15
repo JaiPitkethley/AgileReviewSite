@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Stats{% endblock %}
+
+{% block content %}
+
+<div class="hero-banner stats-page-hero">
+  <div class="hero-accent-bar"></div>
+
+  <div class="hero-text">
+    <h2>{{ user.username }}'s Stats</h2>
+    <p>
+      A long-term overview of your series activity, review habits, favourite genres,
+      status breakdown, and historical review timeline.
+    </p>
+
+    <div class="hero-actions">
+      <a href="{{ url_for('library') }}" class="btn-primary">Back to Library</a>
+      <a href="{{ url_for('profile') }}" class="btn-ghost">Profile</a>
+    </div>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ total_series_tracked }}</div>
+      <div class="hero-stat-l">Tracked</div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ episodes_reviewed }}</div>
+      <div class="hero-stat-l">Reviewed</div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ favourites_count }}</div>
+      <div class="hero-stat-l">Favourites</div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-n">{{ friends_count }}</div>
+      <div class="hero-stat-l">Friends</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-summary-grid stats-summary-grid-6">
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">Series Tracked</div>
+    <div class="stats-summary-value">{{ total_series_tracked }}</div>
+    <div class="stats-summary-sub">All statuses included</div>
+  </div>
+
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">In Library</div>
+    <div class="stats-summary-value">{{ library_series_count }}</div>
+    <div class="stats-summary-sub">Watching / completed / on hold / dropped</div>
+  </div>
+
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">Episodes Reviewed</div>
+    <div class="stats-summary-value">{{ episodes_reviewed }}</div>
+    <div class="stats-summary-sub">Total review entries recorded</div>
+  </div>
+
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">Favourite Genre</div>
+    <div class="stats-summary-value stats-summary-value-wide">{{ top_genre }}</div>
+    <div class="stats-summary-sub">Most common genre in your tracker</div>
+  </div>
+
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">Average Rating</div>
+    <div class="stats-summary-value">{{ average_rating }}</div>
+    <div class="stats-summary-sub">Across all written reviews</div>
+  </div>
+
+  <div class="stats-summary-card">
+    <div class="stats-summary-label">Total Reviews Written</div>
+    <div class="stats-summary-value">{{ total_reviews_written }}</div>
+    <div class="stats-summary-sub">Permanent review history count</div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <section class="stats-card">
+    <div class="section-header">
+      <span class="section-title">Status Breakdown</span>
+    </div>
+
+    <div class="stats-breakdown-list">
+      {% for status, count in status_counts.items() %}
+      <div class="stats-breakdown-row">
+        <div class="stats-breakdown-top">
+          <span>{{ status_labels[status] }}</span>
+          <strong>{{ count }}</strong>
+        </div>
+
+        <div class="stats-bar-track">
+          <div class="stats-bar-fill"
+               style="width: {% if total_series_tracked > 0 %}{{ (count / total_series_tracked * 100)|round(1) }}{% else %}0{% endif %}%;">
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="stats-card">
+    <div class="section-header">
+      <span class="section-title">Top Genres</span>
+    </div>
+
+    {% if top_genres %}
+      <div class="stats-genre-list">
+        {% for genre, count in top_genres %}
+        <div class="stats-genre-row">
+          <span>{{ genre }}</span>
+          <strong>{{ count }}</strong>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-text">No genre data yet.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="stats-card stats-filter-card">
+  <div class="section-header">
+    <span class="section-title">Review Timeline Filters</span>
+    <span class="stats-filter-label">{{ filter_label }}</span>
+  </div>
+
+  <form class="stats-filter-form" method="get" action="{{ url_for('stats') }}">
+    <div class="stats-filter-row">
+      <button class="stats-filter-chip {% if filter_mode == '7d' %}active{% endif %}" type="submit" name="range" value="7d">
+        Recent 7 Days
+      </button>
+
+      <button class="stats-filter-chip {% if filter_mode == 'month' %}active{% endif %}" type="submit" name="range" value="month">
+        This Month
+      </button>
+
+      <button class="stats-filter-chip {% if filter_mode == 'year' %}active{% endif %}" type="submit" name="range" value="year">
+        This Year
+      </button>
+
+      <button class="stats-filter-chip {% if filter_mode == 'all' %}active{% endif %}" type="submit" name="range" value="all">
+        All Time
+      </button>
+    </div>
+  </form>
+
+  <form class="stats-custom-range-form" method="get" action="{{ url_for('stats') }}">
+    <input type="hidden" name="range" value="custom">
+
+    <div class="stats-custom-inputs">
+      <div class="stats-date-group">
+        <label for="start_date">From</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date_str }}">
+      </div>
+
+      <div class="stats-date-group">
+        <label for="end_date">To</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date_str }}">
+      </div>
+
+      <div class="stats-date-action">
+        <button class="btn-primary" type="submit">Apply</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<div class="stats-grid">
+  <section class="stats-card">
+    <div class="section-header">
+      <span class="section-title">Reviews Over Time</span>
+    </div>
+
+    {% if review_timeline %}
+      <div class="stats-chart-list">
+        {% for label, count in review_timeline %}
+        <div class="stats-chart-row">
+          <div class="stats-chart-meta">
+            <span>{{ label }}</span>
+            <strong>{{ count }}</strong>
+          </div>
+
+          <div class="stats-bar-track">
+            <div class="stats-bar-fill"
+                 style="width: {% if max_review_count > 0 %}{{ (count / max_review_count * 100)|round(1) }}{% else %}0{% endif %}%;">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-text">No review activity in this selected period.</p>
+    {% endif %}
+  </section>
+
+  <section class="stats-card">
+    <div class="section-header">
+      <span class="section-title">Ratings Over Time</span>
+    </div>
+
+    {% if rating_timeline %}
+      <div class="stats-chart-list">
+        {% for label, value in rating_timeline %}
+        <div class="stats-chart-row">
+          <div class="stats-chart-meta">
+            <span>{{ label }}</span>
+            <strong>{{ value }}</strong>
+          </div>
+
+          <div class="stats-bar-track">
+            <div class="stats-bar-fill stats-bar-fill-soft"
+                 style="width: {% if max_rating_value > 0 %}{{ (value / max_rating_value * 100)|round(1) }}{% else %}0{% endif %}%;">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-text">No rating history in this selected period.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="stats-card stats-history-card">
+  <div class="section-header">
+    <span class="section-title">Review History</span>
+  </div>
+
+  {% if history_groups %}
+    <div class="stats-history-list">
+      {% for group in history_groups %}
+      <div class="stats-history-group">
+        <div class="stats-history-date">{{ group.date_label }}</div>
+
+        <div class="stats-history-items">
+          {% for review in group.reviews %}
+          <div class="stats-history-item">
+            <div class="stats-history-item-top">
+              <div>
+                <div class="stats-history-series">
+                  {{ review.series_name }} — S{{ review.season_number }}E{{ review.episode_number }}
+                </div>
+                <div class="stats-history-episode">
+                  {{ review.episode_name }}
+                </div>
+              </div>
+
+              <div class="stats-history-rating">
+                {{ review.rating }}/5
+              </div>
+            </div>
+
+            <div class="stats-history-text">
+              {{ review.review_text }}
+            </div>
+
+            <div class="stats-history-time">
+              {% if review.created_at %}
+                {{ review.created_at.strftime("%I:%M %p") }}
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-text">No saved reviews in this selected period.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

@@ -52,6 +52,11 @@
       Profile
     </a>
 
+   <a class="sb-item {% if request.endpoint == 'stats' %}active{% endif %}" href="{{ url_for('stats') }}">
+      <span class="sb-icon">&#9635;</span>
+      Stats
+    </a>
+
     <a class="sb-item {% if request.endpoint == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}">
       <span class="sb-icon">&#9723;</span>
       Settings

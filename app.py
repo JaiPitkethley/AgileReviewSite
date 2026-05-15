@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+from collections import Counter, defaultdict
 from functools import wraps
 from pathlib import Path
 
@@ -698,7 +699,179 @@ def remove_friend(username):
 
     flash(f"{friend.username} removed from friends.", "success")
     return redirect(url_for("friends"))
+@app.route("/stats")
+@login_required
+def stats():
+    all_series = UserSeries.query.filter_by(user_id=g.user.id).all()
 
+    library_series = [
+        show for show in all_series
+        if show.status in ["watching", "completed", "on_hold", "dropped"]
+    ]
+
+    reviews = (
+        EpisodeReview.query
+        .filter_by(user_id=g.user.id)
+        .order_by(EpisodeReview.created_at.desc())
+        .all()
+    )
+
+    favourites_count = Favourite.query.filter_by(user_id=g.user.id).count()
+    friends_count = Friendship.query.filter_by(user_id=g.user.id).count()
+
+    total_series_tracked = len(all_series)
+    library_series_count = len(library_series)
+    episodes_reviewed = len(reviews)
+    total_reviews_written = len(reviews)
+
+    average_rating = 0
+    if reviews:
+        average_rating = round(
+            sum(review.rating for review in reviews if review.rating is not None) / len(reviews),
+            1
+        )
+
+    status_order = ["watchlist", "watching", "completed", "on_hold", "dropped"]
+    status_labels = {
+        "watchlist": "Watchlist",
+        "watching": "Watching",
+        "completed": "Completed",
+        "on_hold": "On Hold",
+        "dropped": "Dropped"
+    }
+
+    status_counts = {status: 0 for status in status_order}
+    for show in all_series:
+        if show.status in status_counts:
+            status_counts[show.status] += 1
+
+    genre_counter = Counter()
+    for show in all_series:
+        if show.genres:
+            for genre in show.genres.split(","):
+                clean_genre = genre.strip()
+                if clean_genre:
+                    genre_counter[clean_genre] += 1
+
+    top_genre = genre_counter.most_common(1)[0][0] if genre_counter else "No data yet"
+    top_genres = genre_counter.most_common(6)
+
+    filter_mode = request.args.get("range", "7d")
+    start_date_str = request.args.get("start_date", "").strip()
+    end_date_str = request.args.get("end_date", "").strip()
+
+    today = datetime.utcnow().date()
+    start_date = None
+    end_date = today
+
+    if filter_mode == "all":
+        start_date = None
+    elif filter_mode == "month":
+        start_date = today.replace(day=1)
+    elif filter_mode == "year":
+        start_date = today.replace(month=1, day=1)
+    elif filter_mode == "custom" and start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            start_date = today - timedelta(days=6)
+            end_date = today
+            filter_mode = "7d"
+    else:
+        start_date = today - timedelta(days=6)
+        end_date = today
+        filter_mode = "7d"
+
+    filtered_reviews = []
+
+    for review in reviews:
+        if not review.created_at:
+            continue
+
+        review_date = review.created_at.date()
+
+        if start_date is not None:
+            if start_date <= review_date <= end_date:
+                filtered_reviews.append(review)
+        else:
+            filtered_reviews.append(review)
+
+    filtered_reviews = sorted(
+        filtered_reviews,
+        key=lambda review: review.created_at,
+        reverse=True
+    )
+
+    review_counts_by_day = defaultdict(int)
+    rating_lists_by_day = defaultdict(list)
+
+    for review in filtered_reviews:
+        day_key = review.created_at.date()
+        review_counts_by_day[day_key] += 1
+        rating_lists_by_day[day_key].append(review.rating)
+
+    review_timeline = []
+    rating_timeline = []
+
+    for day in sorted(review_counts_by_day.keys()):
+        label = day.strftime("%b %d, %Y")
+        review_timeline.append((label, review_counts_by_day[day]))
+
+        ratings = rating_lists_by_day[day]
+        avg_rating_for_day = round(sum(ratings) / len(ratings), 1) if ratings else 0
+        rating_timeline.append((label, avg_rating_for_day))
+
+    max_review_count = max([count for _, count in review_timeline], default=1)
+    max_rating_value = max([value for _, value in rating_timeline], default=1)
+
+    history_groups_dict = defaultdict(list)
+
+    for review in filtered_reviews:
+        day_label = review.created_at.strftime("%B %d, %Y")
+        history_groups_dict[day_label].append(review)
+
+    history_groups = []
+    for day_label, day_reviews in history_groups_dict.items():
+        history_groups.append({
+            "date_label": day_label,
+            "reviews": day_reviews
+        })
+
+    filter_label = "Recent 7 Days"
+    if filter_mode == "all":
+        filter_label = "All Time"
+    elif filter_mode == "month":
+        filter_label = "This Month"
+    elif filter_mode == "year":
+        filter_label = "This Year"
+    elif filter_mode == "custom":
+        filter_label = "Custom Range"
+
+    return render_template(
+        "stats.html",
+        user=g.user,
+        total_series_tracked=total_series_tracked,
+        library_series_count=library_series_count,
+        episodes_reviewed=episodes_reviewed,
+        favourites_count=favourites_count,
+        friends_count=friends_count,
+        average_rating=average_rating,
+        total_reviews_written=total_reviews_written,
+        top_genre=top_genre,
+        top_genres=top_genres,
+        status_counts=status_counts,
+        status_labels=status_labels,
+        review_timeline=review_timeline,
+        rating_timeline=rating_timeline,
+        max_review_count=max_review_count,
+        max_rating_value=max_rating_value,
+        history_groups=history_groups,
+        filter_mode=filter_mode,
+        filter_label=filter_label,
+        start_date_str=start_date_str,
+        end_date_str=end_date_str
+    )
 @app.route("/settings")
 @login_required
 def settings():
