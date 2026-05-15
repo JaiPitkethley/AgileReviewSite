@@ -7,119 +7,66 @@
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
   <div class="hero-text">
-    <h2>Community Hub</h2>
-    <p>See what other fans are watching, trending discussions, reviews, and shared recommendations.</p>
+    <h2>Friends Activity</h2>
+    <p>See what your friends are watching and reviewing in real time.</p>
     <div class="hero-actions">
-      <button class="btn-primary">Join discussions</button>
-      <button class="btn-ghost">Explore groups</button>
-    </div>
-  </div>
-
-  <div class="hero-stat-row">
-    <div class="hero-stat">
-      <div class="hero-stat-n">1.2K</div>
-      <div class="hero-stat-l">Members</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-n">324</div>
-      <div class="hero-stat-l">Reviews</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-n">86</div>
-      <div class="hero-stat-l">Live Threads</div>
+      <a href="{{ url_for('friends') }}" class="btn-primary">Find friends</a>
+      <a href="{{ url_for('profile') }}" class="btn-ghost">My profile</a>
     </div>
   </div>
 </div>
 
-<div class="filter-row">
-  <span class="filter-label">Topics</span>
-  <div class="chip active" onclick="toggleChip(this)">Trending</div>
-  <div class="chip" onclick="toggleChip(this)">Reviews</div>
-  <div class="chip" onclick="toggleChip(this)">Fan Theories</div>
-  <div class="chip" onclick="toggleChip(this)">Recommendations</div>
-  <div class="chip" onclick="toggleChip(this)">News</div>
+<div class="section-header mt-4">
+  <span class="section-title">Friends' Reviews</span>
 </div>
 
-<div class="two-col">
+<div class="continue-list">
 
-  <div>
-    <div class="section-header">
-      <span class="section-title">Trending Discussions</span>
-      <span class="see-all">View all</span>
+  {% if friend_reviews %}
+    {% for review, friend in friend_reviews %}
+      <div class="continue-item friend-row">
+
+        <a class="friend-row-main" href="{{ url_for('public_profile', username=friend.username) }}">
+          <div class="ci-poster p{{ loop.index }}">{{ friend.username[:2] | upper }}</div>
+
+          <div class="ci-body">
+            <div class="ci-title">{{ friend.username }}</div>
+
+            <div class="ci-sub">
+              Reviewed {{ review.series_name }} — {{ review.rating }}/5
+            </div>
+
+            <div class="ci-ep">
+              {{ review.episode_name }} (S{{ review.season_number }}E{{ review.episode_number }})
+            </div>
+
+            <p class="profile-muted-text mt-1">
+              {{ review.review_text[:160] }}{% if review.review_text|length > 160 %}...{% endif %}
+            </p>
+          </div>
+
+          {% if poster_paths[review.series_id] %}
+            <img class="friend-review-poster"
+                 src="https://image.tmdb.org/t/p/w200{{ poster_paths[review.series_id] }}"
+                 alt="{{ review.series_name }}">
+          {% endif %}
+        </a>
+
+      </div>
+    {% endfor %}
+
+  {% else %}
+
+    <div class="profile-side-card mt-4">
+      <div class="section-title">No friend activity yet</div>
+      <p class="profile-muted-text">
+        You don’t have any friend reviews in your feed yet.
+        Add friends to see what they’re watching and reviewing here.
+      </p>
+      <a href="{{ url_for('friends') }}" class="btn-primary mt-2">Go to Friends page</a>
     </div>
 
-    <div class="continue-list">
-
-      <div class="continue-item">
-        <div class="ci-poster p1">S</div>
-        <div class="ci-body">
-          <div class="ci-title">Severance Finale Theory</div>
-          <div class="ci-sub">482 comments · 2h ago</div>
-          <div class="ci-ep">"What Lumon really means?"</div>
-        </div>
-        <span class="badge badge-new">Hot</span>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p4">A</div>
-        <div class="ci-body">
-          <div class="ci-title">Andor Season Review</div>
-          <div class="ci-sub">231 comments · Today</div>
-          <div class="ci-ep">Community rating: 9.7/10</div>
-        </div>
-        <span class="badge badge-finished">Top</span>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p3">B</div>
-        <div class="ci-body">
-          <div class="ci-title">Black Mirror Predictions</div>
-          <div class="ci-sub">164 comments · Yesterday</div>
-          <div class="ci-ep">New episode speculation</div>
-        </div>
-        <span class="badge badge-new">Buzz</span>
-      </div>
-
-    </div>
-  </div>
-
-  <div>
-    <div class="section-header">
-      <span class="section-title">Popular Reviewers</span>
-      <span class="see-all">Follow</span>
-    </div>
-
-    <div class="continue-list">
-
-      <div class="continue-item">
-        <div class="ci-poster p2">JD</div>
-        <div class="ci-body">
-          <div class="ci-title">Jane Doe</div>
-          <div class="ci-sub">Sci-Fi Critic</div>
-          <div class="ci-ep">12.4K followers</div>
-        </div>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p5">MS</div>
-        <div class="ci-body">
-          <div class="ci-title">Mike Stream</div>
-          <div class="ci-sub">Drama Specialist</div>
-          <div class="ci-ep">8.1K followers</div>
-        </div>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p6">AR</div>
-        <div class="ci-body">
-          <div class="ci-title">Alex Reviews</div>
-          <div class="ci-sub">Weekly Top 10 Lists</div>
-          <div class="ci-ep">15K followers</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  {% endif %}
 
 </div>
 
