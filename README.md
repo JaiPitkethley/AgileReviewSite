@@ -1,170 +1,75 @@
-# AgileReviewSite
+# AgileReviewSite — Test Suite
 
-UWA Agile Web Development project for 2026.
+## Structure
 
-## Project Overview
+```
+tests/
+├── conftest.py       # Shared fixtures (in-memory DB, test client, auth helper)
+├── test_unit.py      # 50 unit tests (no browser required)
+└── test_selenium.py  # Selenium browser tests (Chrome headless required)
+```
 
-This project is currently a Flask-based local web application prototype for a series tracking and review platform.
-
-The current version includes:
-- landing page
-- login page
-- signup page
-- dashboard page
-- local backend authentication flow
-- local SQLite database storage
-
-Users can create an account, sign in, stay logged in with session support, access the dashboard, and log out.
-
----
-
-## Current Features
-
-### Frontend / Page Flow
-- Landing page
-- Login page
-- Signup page
-- Dashboard page
-- Navigation between all main pages
-
-### Backend / Authentication
-- Flask backend
-- Local SQLite database
-- User signup
-- User login
-- Password hashing
-- Session-based login
-- Logout
-- Dashboard connected to the currently logged-in user
-
-### Current Page Flow
-- `landing -> login`
-- `landing -> signup`
-- `login -> dashboard`
-- `signup -> dashboard`
-- `dashboard -> logout -> landing`
-
----
-
-## Project Structure
-
-```text
-AgileReviewSite/
-├── app.py
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── templates/
-│   ├── landing.html
-│   ├── login.html
-│   ├── signup.html
-│   └── reviewsitehome.html
-└── static/
-    └── styles.css
-````
-
----
-
-## How to Run the App Locally
-
-### 1. Clone the repository
+## Setup
 
 ```bash
-git clone <your-repo-url>
+# Install dependencies (if not already installed)
+pip install -r requirements.txt
+pip install pytest selenium webdriver-manager
+```
+
+## Running Tests
+
+### Unit tests only (fast, no browser needed)
+```bash
 cd AgileReviewSite
+pytest tests/test_unit.py -v
 ```
 
-### 2. Install dependencies
-
+### Selenium tests (requires Chrome + ChromeDriver)
 ```bash
-python3 -m pip install -r requirements.txt
+pytest tests/test_selenium.py -v
 ```
 
-### 3. Run the Flask app
-
+### Full suite
 ```bash
-python3 app.py
-```
-
-### 4. Open in browser
-
-```text
-http://127.0.0.1:5000
+pytest tests/ -v
 ```
 
 ---
 
-## Main Routes
+## What's covered
 
-* Landing page: `http://127.0.0.1:5000/landing`
-* Login page: `http://127.0.0.1:5000/login`
-* Signup page: `http://127.0.0.1:5000/signup`
-* Dashboard: `http://127.0.0.1:5000/dashboard`
-* Logout: `http://127.0.0.1:5000/logout`
+### Unit Tests (`test_unit.py`) — 50 tests
 
----
+| Class | What's tested |
+|---|---|
+| `TestHelpers` | `get_first_genre`, `get_genre_stats` helper functions |
+| `TestUserAccounts` | Signup, duplicate detection, login, logout, delete account |
+| `TestAuthGuard` | `@login_required` on all 8 protected routes |
+| `TestWatchlist` | Page load, remove, priority toggle on/off |
+| `TestLibrary` | Page load, status updates (watching/completed), invalid status rejected |
+| `TestFavourites` | Page load, toggle add, toggle remove |
+| `TestEpisodeReviews` | Add review, empty text rejected, update existing, delete, field storage |
+| `TestFriends` | Add, self-add blocked, duplicate blocked, remove, friend profile access, non-friend blocked |
+| `TestDatabaseConstraints` | Unique constraints, password hashing, cascade deletes |
 
-## Test Accounts
+### Selenium Tests (`test_selenium.py`)
 
-If you are using the same local database file, these test accounts may work:
-
-* `test1@example.com` / `123456`
-* `test2@example.com` / `123456`
-
-If these accounts do not work on your machine, just create a new account locally using the signup page.
-
----
-
-## Local Database Notes
-
-This project currently uses a **local SQLite database** (`users.db`).
-
-That means:
-
-* the database is generated locally when running the app
-* account data is stored only on the local machine running the app
-* if another person clones the project, they will not automatically share the same registered accounts unless the same database file is also shared
-
-So the current backend/database setup works locally, but it is **not yet a shared cloud-hosted database system**.
+| Class | What's tested |
+|---|---|
+| `TestLandingPage` | Page loads, signup/login links present |
+| `TestSignupFlow` | Form fields present, successful redirect, duplicate email error |
+| `TestLoginFlow` | Form fields, valid login redirect, invalid login error |
+| `TestNavigation` | All 8 main pages load when authenticated, redirect when logged out, navbar present |
+| `TestLogout` | Redirects to landing, subsequent protected page access blocked |
+| `TestResponsive` | Mobile viewport (375px) no horizontal scroll, desktop renders, CSS loaded |
+| `TestFriendsPage` | Search form present, results displayed |
 
 ---
 
-## Current Limitations
+## Design Notes
 
-* database is local only
-* no cloud deployment yet
-* no shared hosted database yet
-* dashboard content is mostly static except for logged-in user integration
-* account data is not synchronized across different cloned copies of the project
-
----
-
-## Notes for Developers
-
-* Password hashing is enabled in the backend
-* Session-based authentication is enabled
-* The dashboard uses the logged-in user data for display
-* Local-only files such as `users.db` and `.DS_Store` should not be committed to the repository
-
----
-
-## Future Improvements
-
-Possible next steps:
-
-* deploy the Flask app online
-* move from local SQLite to a shared database such as PostgreSQL
-* connect dashboard features to real user data
-* implement watchlist, favourites, reviews, and friend features
-* improve dashboard integration across all branches
-
----
-
-## Tech Stack
-
-* Python
-* Flask
-* SQLite
-* HTML
-* CSS
-* JavaScript
+- **Isolated database**: unit tests use SQLite in-memory (`sqlite:///:memory:`), so the production `users.db` is never touched.
+- **CSRF disabled**: `WTF_CSRF_ENABLED=False` in test config lets form POSTs work without tokens.
+- **TMDB API**: review tests that redirect to the episode page don't follow redirects, since that page calls the live TMDB API. The DB write is tested directly instead.
+- **Selenium server**: a live Flask server is spun up on a random free port in a background thread for the duration of the Selenium module.
