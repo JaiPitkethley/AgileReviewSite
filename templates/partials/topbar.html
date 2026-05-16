@@ -1,4 +1,9 @@
 <header class="topbar">
+  <button type="button" class="hamburger-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
   <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('dashboard') }}" method="get">
     <span class="topbar-search-icon">&#9906;</span>
 
@@ -16,8 +21,6 @@
     {% if g.user %}
       <span class="topbar-username">Hi, {{ g.user.username }}</span>
     {% endif %}
-
-    <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
 
     <button type="button" class="theme-toggle">
       ☾ Dark
