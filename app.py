@@ -595,7 +595,7 @@ def public_profile(username):
 def library():
     shows = UserSeries.query.filter(
         UserSeries.user_id == g.user.id,
-        UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+        UserSeries.status.in_(TRACKED_STATUSES)
     ).all()
 
     favourite_ids = {
@@ -682,7 +682,7 @@ def favourites():
         .filter(
             UserSeries.user_id == g.user.id,
             Favourite.user_id == g.user.id,
-            UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+            UserSeries.status.in_(TRACKED_STATUSES)
         )
         .order_by(Favourite.added_at.desc())
         .all()
