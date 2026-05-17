@@ -1581,11 +1581,24 @@ select,
   margin-bottom: 28px;
 }
 
+.profile-filter-row .chip {
+  cursor: default;
+}
+
+.profile-filter-row .chip:hover {
+  border-color: var(--border2);
+  color: var(--text2);
+}
+
 .profile-dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 28px;
   align-items: start;
+}
+
+.profile-dashboard-grid.single-column {
+  grid-template-columns: 1fr;
 }
 
 .profile-main,
