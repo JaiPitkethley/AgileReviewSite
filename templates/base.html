@@ -20,6 +20,7 @@
   <input type="hidden" id="global-csrf-token" value="{{ csrf_token() }}">
 
   <div class="shell">
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     {% include "partials/sidebar.html" %}
 
@@ -37,6 +38,51 @@
   </div>
 
   <script>
+    const sidebar   = document.querySelector('.sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const shell     = document.querySelector('.shell');
+    const isMobile  = () => window.innerWidth <= 768;
+
+    function openSidebar() {
+      if (isMobile()) {
+        sidebar.classList.add('mobile-open');
+        overlay?.classList.add('visible');
+      } else {
+        sidebar.classList.remove('collapsed');
+      }
+      shell.classList.add('sidebar-open');
+      localStorage.setItem('sidebarOpen', 'true');
+    }
+
+    function closeSidebar() {
+      if (isMobile()) {
+        sidebar.classList.remove('mobile-open');
+        overlay?.classList.remove('visible');
+      } else {
+        sidebar.classList.add('collapsed');
+      }
+      shell.classList.remove('sidebar-open');
+      localStorage.setItem('sidebarOpen', 'false');
+    }
+
+    function toggleSidebar() {
+      const isOpen = isMobile()
+        ? sidebar.classList.contains('mobile-open')
+        : !sidebar.classList.contains('collapsed');
+      isOpen ? closeSidebar() : openSidebar();
+    }
+
+    toggleBtn?.addEventListener('click', toggleSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+
+    const saved = localStorage.getItem('sidebarOpen');
+    if (isMobile()) {
+      closeSidebar();
+    } else if (saved === 'false') {
+      closeSidebar();
+    }
+    
     function toggleChip(el) {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
