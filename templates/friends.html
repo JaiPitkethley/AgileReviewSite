@@ -48,8 +48,8 @@
         action="{{ url_for('friends') }}">
 
     <input type="text"
-           name="q"
-           value="{{ q or '' }}"
+           name="friend_q"
+           value="{{ friend_q or '' }}"
            placeholder="Search users by username...">
 
     <button type="submit" class="btn-primary">
@@ -57,7 +57,7 @@
     </button>
   </form>
 
-  {% if q %}
+  {% if friend_q %}
     <div class="friend-search-results">
 
       {% if search_results %}
@@ -102,7 +102,7 @@
           </div>
 
           <p class="profile-muted-text">
-            No users matched "{{ q }}",
+            No users matched "{{ friend_q }}",
             or they are already your friend.
           </p>
         </div>

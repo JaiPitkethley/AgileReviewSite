@@ -941,14 +941,14 @@ def friends():
         ).count()
 
     # Search users to add as friends
-    q = request.args.get("q", "").strip()
+    friend_q = request.args.get("friend_q", "").strip()
     search_results = []
 
-    if q:
+    if friend_q:
         current_friend_ids = [item["user"].id for item in friends]
 
         search_results = User.query.filter(
-            User.username.ilike(f"%{q}%"),
+            User.username.ilike(f"%{friend_q}%"),
             User.id != g.user.id,
             ~User.id.in_(current_friend_ids) if current_friend_ids else True
         ).limit(10).all()
@@ -959,7 +959,7 @@ def friends():
         friends=friends,
         friend_count=friend_count,
         shared_reviews_count=shared_reviews_count,
-        q=q,
+        friend_q=friend_q,
         search_results=search_results
     )
     
