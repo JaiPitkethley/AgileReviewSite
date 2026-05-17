@@ -2974,3 +2974,113 @@ body.light-mode .action-btn{
     font-size: 20px;
   }
 }
+
+/* FAVOURITES FROM WATCHLIST + SERIES DETAIL */
+
+/* Watchlist card: pin + star grouped on the left */
+.card-left-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* Watchlist favourite star button */
+.favourite-action-btn {
+  color: var(--text2);
+}
+
+.favourite-action-btn:hover {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.55);
+  background: rgba(212, 168, 75, 0.08);
+}
+
+.favourite-action-btn.is-favourite {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.6);
+  background: rgba(212, 168, 75, 0.18);
+}
+
+/* Light mode support for watchlist favourite star */
+body.light-mode .favourite-action-btn {
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+body.light-mode .favourite-action-btn:hover,
+body.light-mode .favourite-action-btn.is-favourite {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.65);
+  background: rgba(212, 168, 75, 0.12);
+}
+
+/* Series detail title row: show name + star + genre */
+.series-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.series-title-row h1 {
+  margin-bottom: 0;
+}
+
+.series-title-favourite-form {
+  margin: 0;
+}
+
+.series-title-favourite-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(12, 12, 20, 0.86);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.series-title-favourite-btn:hover {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.55);
+  background: rgba(212, 168, 75, 0.08);
+  transform: translateY(-1px);
+}
+
+.series-title-favourite-btn.is-favourite {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.6);
+  background: rgba(212, 168, 75, 0.18);
+}
+
+/* Light mode support for series detail favourite star */
+body.light-mode .series-title-favourite-btn {
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+body.light-mode .series-title-favourite-btn:hover,
+body.light-mode .series-title-favourite-btn.is-favourite {
+  color: var(--yellow);
+  border-color: rgba(212, 168, 75, 0.65);
+  background: rgba(212, 168, 75, 0.12);
+}
+
+/* Favourites page: allow watchlist favourites to keep a nice bordered card style */
+.library-card.status-watchlist::before {
+  border-color: rgba(127, 119, 221, 0.65);
+  box-shadow: 0 0 22px rgba(127, 119, 221, 0.14);
+}
+
+.library-card.status-watchlist .status-notch {
+  color: var(--accent-hi);
+  border-color: rgba(127, 119, 221, 0.55);
+  background: rgba(127, 119, 221, 0.16);
+}

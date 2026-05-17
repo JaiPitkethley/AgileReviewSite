@@ -17,13 +17,24 @@
 
     <div class="series-detail-info">
 
-      <h1>
-        {{ series.name }}
+      <div class="series-title-row">
+        <h1>{{ series.name }}</h1>
+
+        <form action="{{ url_for('toggle_favourite') }}" method="POST" class="series-title-favourite-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="tmdb_id" value="{{ series.id }}">
+
+          <button type="submit" class="series-title-favourite-btn {% if is_favourite %}is-favourite{% endif %}"
+            title="{% if is_favourite %}Remove from favourites{% else %}Add to favourites{% endif %}"
+            aria-label="{% if is_favourite %}Remove from favourites{% else %}Add to favourites{% endif %}">
+            <i class="{% if is_favourite %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+          </button>
+        </form>
 
         {% if series.genres %}
         <span class="genre-bubble">{{ series.genres[0].name }}</span>
         {% endif %}
-      </h1>
+      </div>
 
       <p class="series-meta">
         <span class="meta-bubble">
@@ -49,9 +60,13 @@
         {{ series.overview }}
       </p>
 
+      {% if user_series and user_series.status != "watchlist" %}
+      <a href="{{ url_for('library') }}" class="btn-ghost">In Library</a>
+      {% else %}
       <button class="btn-primary add-watchlist-btn" data-series-id="{{ series.id }}" type="button">
-        Add to Watchlist
+        {% if user_series %}Added{% else %}Add to Watchlist{% endif %}
       </button>
+      {% endif %}
     </div>
 
   </div>
