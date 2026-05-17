@@ -7,232 +7,115 @@
 <div class="hero-banner">
   <div class="hero-accent-bar"></div>
   <div class="hero-text">
-    <h2>Welcome back, {{ user["username"] }}</h2>
-    <p>You have 3 series in progress and 2 new episodes dropped this week on your watchlist.</p>
+    <h2>Welcome back, {{ user.username }}</h2>
+    <p>You are tracking {{ total_series }} shows and have reviewed {{ episode_count }} episodes.</p>
     <div class="hero-actions">
-      <button class="btn-primary">Continue watching</button>
-      <button class="btn-ghost">Browse new releases</button>
+      <a href="{{ url_for('watchlist') }}" class="btn-primary">Continue watching</a>
+      <a href="#newReleases" class="btn-ghost">Browse new releases</a>
       <a href="{{ url_for('stats') }}" class="btn-ghost">View stats</a>
     </div>
   </div>
   <div class="hero-stat-row">
     <div class="hero-stat">
-      <div class="hero-stat-n">47</div>
+      <div class="hero-stat-n">{{ completed_count }}</div>
       <div class="hero-stat-l">Finished</div>
     </div>
     <div class="hero-stat">
-      <div class="hero-stat-n">8</div>
+      <div class="hero-stat-n">{{ watching_count }}</div>
       <div class="hero-stat-l">Watching</div>
     </div>
     <div class="hero-stat">
-      <div class="hero-stat-n">312</div>
+      <div class="hero-stat-n">{{ episode_count }}</div>
       <div class="hero-stat-l">Episodes</div>
     </div>
   </div>
 </div>
 
-<div class="filter-row">
-  <span class="filter-label">Genre</span>
-  <div class="chip active" onclick="toggleChip(this)">All</div>
-  <div class="chip" onclick="toggleChip(this)">Drama</div>
-  <div class="chip" onclick="toggleChip(this)">Thriller</div>
-  <div class="chip" onclick="toggleChip(this)">Sci-Fi</div>
-  <div class="chip" onclick="toggleChip(this)">Crime</div>
-  <div class="chip" onclick="toggleChip(this)">Fantasy</div>
-  <div class="chip" onclick="toggleChip(this)">Comedy</div>
-  <div class="chip" onclick="toggleChip(this)">Documentary</div>
+<div class="section-header mt-4">
+  <span class="section-title">Continue watching</span>
+  <span class="see-all"><a href="{{ url_for('watchlist') }}">View all</a></span>
 </div>
-<div id="discoverContent"></div>
-<div class="two-col">
 
-  <div>
-    <div class="section-header">
-      <span class="section-title">Continue watching</span>
-      <span class="see-all">View all</span>
-    </div>
-    <div class="continue-list">
-
-      <div class="continue-item">
-        <div class="ci-poster p1">S</div>
+<div class="continue-list">
+  {% if continue_watching %}
+    {% for show in continue_watching %}
+      <a href="/series/{{ show.tmdb_id }}" class="continue-item">
+        <div class="ci-poster p{{ loop.index }}">{{ show.name[:1] }}</div>
         <div class="ci-body">
-          <div class="ci-title">Severance</div>
-          <div class="ci-sub">S2 · Ep 7 — Woe's Hollow</div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-fill" style="width:70%"></div>
-            </div>
-            <span class="ci-pct">70%</span>
+          <div class="ci-title">{{ show.name }}</div>
+          <div class="ci-sub">{{ show.status.replace('_', ' ').title() }}</div>
+          <div class="ci-meta">
+            <span class="rating-pill">{{ (show.vote_average or 0) | round(1) }}/10</span>
+            <span class="stars">{{ '★' * (show.vote_average | default(0) | float | int // 2) }}{{ '☆' * (5 - (show.vote_average | default(0) | float | int // 2)) }}</span>
           </div>
         </div>
         <div class="play-btn">&#9654;</div>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p2">T</div>
-        <div class="ci-body">
-          <div class="ci-title">The Bear</div>
-          <div class="ci-sub">S3 · Ep 3 — Doors</div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-fill" style="width:30%"></div>
-            </div>
-            <span class="ci-pct">30%</span>
-          </div>
-        </div>
-        <div class="play-btn">&#9654;</div>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p3">O</div>
-        <div class="ci-body">
-          <div class="ci-title">Outer Banks</div>
-          <div class="ci-sub">S4 · Ep 8 — The Lighthouse</div>
-          <div class="ci-bar">
-            <div class="ci-track">
-              <div class="ci-fill" style="width:85%"></div>
-            </div>
-            <span class="ci-pct">85%</span>
-          </div>
-        </div>
-        <div class="play-btn">&#9654;</div>
-      </div>
-
-    </div>
-  </div>
-
-  <div>
-    <div class="section-header">
-      <span class="section-title">New this week</span>
-      <span class="see-all">View all</span>
-    </div>
-    <div class="continue-list">
-
-      <div class="continue-item">
-        <div class="ci-poster p4">A</div>
-        <div class="ci-body">
-          <div class="ci-title">Andor S2</div>
-          <div class="ci-sub">Ep 3 dropped · Disney+</div>
-          <div class="ci-ep">Added to your watchlist</div>
-        </div>
-        <span class="badge badge-new">New</span>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p5">W</div>
-        <div class="ci-body">
-          <div class="ci-title">White Lotus S3</div>
-          <div class="ci-sub">Finale aired · HBO</div>
-          <div class="ci-ep">You finished this!</div>
-        </div>
-        <span class="badge badge-finished">Done</span>
-      </div>
-
-      <div class="continue-item">
-        <div class="ci-poster p6">P</div>
-        <div class="ci-body">
-          <div class="ci-title">Paradise</div>
-          <div class="ci-sub">S1 now streaming · Hulu</div>
-          <div class="ci-ep">On your wishlist</div>
-        </div>
-        <span class="badge badge-new">New</span>
-      </div>
-
-    </div>
-  </div>
-
+      </a>
+    {% endfor %}
+  {% else %}
+    <p style="color: var(--text2);">No series are currently marked as watching. Add something to your watchlist to see it here.</p>
+  {% endif %}
 </div>
+
+<div class="section-header mt-4 trending-header">
+  <span class="section-title">Trending this week</span>
+</div>
+<div class="card-grid limited-fit">
+  {% for show in trending_shows %}
+    <div class="card">
+      <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+        <div class="poster" {% if show.poster_path %}style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}'); background-size: cover; background-position: center;"{% endif %}>
+          {% if not show.poster_path %}{{ show.initial }}{% endif %}
+          {% if show.badge %}
+            <span class="badge badge-watching">{{ show.badge }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="card-title">{{ show.title }}</div>
+          <div class="card-sub">{{ show.subtitle }}</div>
+          <div class="card-meta">
+            <span class="rating-pill">{{ show.rating | round(1) }}/10</span>
+            <div class="stars">{{ show.stars }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  {% endfor %}
+  {% if not trending_shows %}
+    <p style="color: var(--text2);">Trending shows are unavailable right now. Check again soon.</p>
+  {% endif %}
+</div>
+
+<div class="section-divider" aria-hidden="true"></div>
 
 <div class="section-header mt-4">
-  <span class="section-title" id="discoverSectionTitle">
-    {% if request.args.get('q') %}
-    Search Results for "{{ request.args.get('q') }}"
-    {% else %}
-    Trending — Drama
-    {% endif %}
-  </span>
-  <span class="see-all">View all</span>
+  <span class="section-title" id="newReleases">New releases today</span>
+</div>
+<div class="card-grid limited-fit">
+  {% for show in new_releases %}
+    <div class="card">
+      <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
+        <div class="poster" {% if show.poster_path %}style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}'); background-size: cover; background-position: center;"{% endif %}>
+          {% if not show.poster_path %}{{ show.initial }}{% endif %}
+          {% if show.badge %}
+            <span class="badge badge-new">{{ show.badge }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="card-title">{{ show.title }}</div>
+          <div class="card-sub">{{ show.subtitle }}</div>
+          <div class="card-meta">
+            <span class="rating-pill">{{ show.rating | round(1) }}/10</span>
+            <div class="stars">{{ show.stars }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  {% endfor %}
+  {% if not new_releases %}
+    <p style="color: var(--text2);">New releases are unavailable right now. Try again later.</p>
+  {% endif %}
 </div>
 
-<div class="card-grid" id="topbarSearchResults">
-  <div class="card">
-    <div class="poster p1">
-      S
-      <span class="badge badge-watching">Watching</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:70%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Severance</div>
-      <div class="card-sub">
-        Apple TV+
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="poster p6">D</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Dune: Prophecy</div>
-      <div class="card-sub">
-        HBO Max
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="poster p4">
-      A
-      <span class="badge badge-new">New ep</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Andor S2</div>
-      <div class="card-sub">
-        Disney+
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="poster p5">
-      W
-      <span class="badge badge-finished">Finished</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:100%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">White Lotus</div>
-      <div class="card-sub">
-        HBO Max
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="poster p3">B</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-title">Black Mirror</div>
-      <div class="card-sub">
-        Netflix
-        <div class="stars">★★★★☆</div>
-      </div>
-    </div>
-  </div>
-
-</div>
 </div>
 {% endblock %}

@@ -204,6 +204,56 @@ def get_show_details(tmdb_id):
     return response.json()
 
 
+def fetch_tmdb(endpoint, params=None):
+    if not TMDB_API_KEY:
+        return []
+
+    url = f"{TMDB_BASE_URL}/{endpoint}"
+    query = {"api_key": TMDB_API_KEY, "language": "en-US"}
+    if params:
+        query.update(params)
+
+    try:
+        response = requests.get(url, params=query, timeout=5)
+        response.raise_for_status()
+        return response.json().get("results", [])
+    except requests.RequestException:
+        return []
+
+
+def format_tmdb_card(show, badge=None):
+    title = show.get("name") or show.get("title") or "Untitled"
+    poster_path = show.get("poster_path") or show.get("backdrop_path") or ""
+    rating = show.get("vote_average") or 0
+    first_air = show.get("first_air_date") or show.get("release_date") or ""
+    year = first_air[:4] if first_air else ""
+    subtitle = f"TV · {year}" if year else "TV"
+    star_count = min(5, max(0, int(round(rating / 2))))
+    stars = "★" * star_count + "☆" * (5 - star_count)
+
+    return {
+        "tmdb_id": show.get("id"),
+        "title": title,
+        "poster_path": poster_path,
+        "rating": rating,
+        "subtitle": subtitle,
+        "stars": stars,
+        "badge": badge,
+        "progress_width": min(100, max(0, int(rating * 10))),
+        "initial": title[:1].upper() if title else "T",
+    }
+
+
+def get_tmdb_trending(limit=6):
+    shows = fetch_tmdb("trending/tv/week", {"page": 1})
+    return [format_tmdb_card(show, badge="Trending") for show in shows[:limit]]
+
+
+def get_tmdb_new_releases(limit=6):
+    shows = fetch_tmdb("tv/airing_today", {"page": 1})
+    return [format_tmdb_card(show, badge="New") for show in shows[:limit]]
+
+
 def get_first_genre(show):
     if not show.genres:
         return None
@@ -355,7 +405,37 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("reviewsitehome.html", user=g.user)
+    total_series = UserSeries.query.filter_by(user_id=g.user.id).count()
+    watchlist_count = UserSeries.query.filter_by(user_id=g.user.id, status="watchlist").count()
+    watching_count = UserSeries.query.filter_by(user_id=g.user.id, status="watching").count()
+    completed_count = UserSeries.query.filter_by(user_id=g.user.id, status="completed").count()
+    episode_count = EpisodeReview.query.filter_by(user_id=g.user.id).count()
+
+    continue_watching = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        status="watching"
+    ).order_by(UserSeries.added_at.desc()).limit(3).all()
+
+    if not continue_watching:
+        continue_watching = UserSeries.query.filter_by(
+            user_id=g.user.id
+        ).order_by(UserSeries.added_at.desc()).limit(3).all()
+
+    trending_shows = get_tmdb_trending()
+    new_releases = get_tmdb_new_releases()
+
+    return render_template(
+        "reviewsitehome.html",
+        user=g.user,
+        total_series=total_series,
+        watchlist_count=watchlist_count,
+        watching_count=watching_count,
+        completed_count=completed_count,
+        episode_count=episode_count,
+        continue_watching=continue_watching,
+        trending_shows=trending_shows,
+        new_releases=new_releases,
+    )
 
 
 @app.route("/profile")

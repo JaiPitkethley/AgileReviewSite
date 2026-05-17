@@ -4,18 +4,22 @@
     <span></span>
     <span></span>
   </button>
-  <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('dashboard') }}" method="get">
-    <span class="topbar-search-icon">&#9906;</span>
+  <div class="topbar-search-wrapper">
+    <form id="topbarSearchForm" class="topbar-search" action="{{ url_for('dashboard') }}" method="get">
+      <span class="topbar-search-icon">&#9906;</span>
 
-    <input
-      id="topbarSearchInput"
-      name="q"
-      type="text"
-      placeholder="Search series, director, cast..."
-      autocomplete="off"
-      value="{{ request.args.get('q', '') }}"
-    >
-  </form>
+      <input
+        id="topbarSearchInput"
+        name="q"
+        type="text"
+        placeholder="Search series, director, cast..."
+        autocomplete="off"
+        value="{{ request.args.get('q', '') }}"
+      >
+      <button type="button" class="topbar-search-clear" id="topbarSearchClear" aria-label="Clear search results">&times;</button>
+    </form>
+    <div class="topbar-search-dropdown hidden" id="topbarSearchResults"></div>
+  </div>
 
   <div class="topbar-right">
     {% if g.user %}
