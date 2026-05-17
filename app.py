@@ -595,7 +595,8 @@ def public_profile(username):
 def library():
     shows = UserSeries.query.filter(
         UserSeries.user_id == g.user.id,
-        UserSeries.status.in_(TRACKED_STATUSES)
+        UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+
     ).all()
 
     favourite_ids = {
