@@ -34,6 +34,7 @@ migrate = Migrate(app, db)
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 TMDB_READ_TOKEN = os.getenv("TMDB_READ_TOKEN")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
+TRACKED_STATUSES = ["watchlist", "watching", "completed", "on_hold", "dropped"]
 
 
 # -------------------- MODELS --------------------
@@ -202,7 +203,36 @@ def get_show_details(tmdb_id):
     }
     response = requests.get(url, params=params)
     return response.json()
+def get_or_create_user_series(tmdb_id, default_status="watchlist"):
+    item = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id
+    ).first()
 
+    if item:
+        return item
+
+    show = get_show_details(tmdb_id)
+
+    genre_names = []
+    for genre in show.get("genres", []):
+        if genre.get("name"):
+            genre_names.append(genre.get("name"))
+
+    item = UserSeries(
+        user_id=g.user.id,
+        tmdb_id=tmdb_id,
+        name=show.get("name", "Unknown Series"),
+        poster_path=show.get("poster_path"),
+        vote_average=show.get("vote_average"),
+        genres=", ".join(genre_names),
+        status=default_status
+    )
+
+    db.session.add(item)
+    db.session.flush()
+
+    return item
 
 def fetch_tmdb(endpoint, params=None):
     if not TMDB_API_KEY:
@@ -476,7 +506,7 @@ def profile():
         .filter(
             UserSeries.user_id == g.user.id,
             Favourite.user_id == g.user.id,
-            UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+            UserSeries.status.in_(TRACKED_STATUSES)
         )
         .order_by(Favourite.added_at.desc())
         .limit(4)
@@ -566,6 +596,7 @@ def library():
     shows = UserSeries.query.filter(
         UserSeries.user_id == g.user.id,
         UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+
     ).all()
 
     favourite_ids = {
@@ -599,21 +630,48 @@ def library():
 @app.route("/watchlist")
 @login_required
 def watchlist():
-    shows = UserSeries.query.filter_by(
+    sort = request.args.get("sort", "recent")
+
+    query = UserSeries.query.filter_by(
         user_id=g.user.id,
         status="watchlist"
-    ).order_by(
-        UserSeries.priority.desc(),
-        UserSeries.added_at.desc()
-    ).all()
+    )
+
+    if sort == "az":
+        shows = query.order_by(
+            UserSeries.priority.desc(),
+            UserSeries.name.asc()
+        ).all()
+    elif sort == "za":
+        shows = query.order_by(
+            UserSeries.priority.desc(),
+            UserSeries.name.desc()
+        ).all()
+    elif sort == "rating":
+        shows = query.order_by(
+            UserSeries.priority.desc(),
+            UserSeries.vote_average.desc()
+        ).all()
+    else:
+        shows = query.order_by(
+            UserSeries.priority.desc(),
+            UserSeries.added_at.desc()
+        ).all()
 
     priority_count = sum(1 for show in shows if show.priority)
+
+    favourite_ids = {
+        favourite.tmdb_id
+        for favourite in Favourite.query.filter_by(user_id=g.user.id).all()
+    }
 
     return render_template(
         "watchlist.html",
         shows=shows,
         user=g.user,
-        priority_count=priority_count
+        priority_count=priority_count,
+        favourite_ids=favourite_ids,
+        sort=sort
     )
     
 @app.route("/favourites")
@@ -625,7 +683,7 @@ def favourites():
         .filter(
             UserSeries.user_id == g.user.id,
             Favourite.user_id == g.user.id,
-            UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
+            UserSeries.status.in_(TRACKED_STATUSES)
         )
         .order_by(Favourite.added_at.desc())
         .all()
@@ -667,23 +725,18 @@ def toggle_favourite():
         db.session.commit()
         return redirect(request.referrer or url_for("library"))
 
-    show = UserSeries.query.filter(
-        UserSeries.user_id == g.user.id,
-        UserSeries.tmdb_id == tmdb_id,
-        UserSeries.status.in_(["watching", "completed", "on_hold", "dropped"])
-    ).first()
+    show = get_or_create_user_series(tmdb_id, default_status="watchlist")
 
-    if show:
-        favourite = Favourite(
-            user_id=g.user.id,
-            tmdb_id=show.tmdb_id,
-            name=show.name,
-            poster_path=show.poster_path,
-            vote_average=show.vote_average
-        )
+    favourite = Favourite(
+        user_id=g.user.id,
+        tmdb_id=show.tmdb_id,
+        name=show.name,
+        poster_path=show.poster_path,
+        vote_average=show.vote_average
+    )
 
-        db.session.add(favourite)
-        db.session.commit()
+    db.session.add(favourite)
+    db.session.commit()
 
     return redirect(request.referrer or url_for("library"))
 
@@ -1171,7 +1224,23 @@ def series_detail(series_id):
     response = requests.get(url, params=params)
     series = response.json()
 
-    return render_template("seriesdetail.html", series=series, user=g.user)
+    user_series = UserSeries.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=series_id
+    ).first()
+
+    is_favourite = Favourite.query.filter_by(
+        user_id=g.user.id,
+        tmdb_id=series_id
+    ).first() is not None
+
+    return render_template(
+        "seriesdetail.html",
+        series=series,
+        user=g.user,
+        user_series=user_series,
+        is_favourite=is_favourite
+    )
 
 
 @app.route("/series/<int:series_id>/season/<int:season_number>")
@@ -1296,11 +1365,19 @@ def remove_from_watchlist():
     tmdb_id = request.form.get("tmdb_id")
 
     if tmdb_id:
+        tmdb_id = int(tmdb_id)
+
+        Favourite.query.filter_by(
+            user_id=g.user.id,
+            tmdb_id=tmdb_id
+        ).delete()
+
         UserSeries.query.filter_by(
             user_id=g.user.id,
-            tmdb_id=int(tmdb_id),
+            tmdb_id=tmdb_id,
             status="watchlist"
         ).delete()
+
         db.session.commit()
 
     return redirect(request.referrer or url_for("watchlist"))

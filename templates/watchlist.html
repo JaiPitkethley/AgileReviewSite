@@ -34,24 +34,20 @@
 <div class="filter-row">
   <span class="filter-label">Sort by</span>
 
-  <a href="{{ url_for('watchlist', sort='recent') }}"
-     class="chip {% if sort == 'recent' %}active{% endif %}">
-     Recently added
+  <a href="{{ url_for('watchlist', sort='recent') }}" class="chip {% if sort == 'recent' %}active{% endif %}">
+    Recently added
   </a>
 
-  <a href="{{ url_for('watchlist', sort='az') }}"
-     class="chip {% if sort == 'az' %}active{% endif %}">
-     A → Z
+  <a href="{{ url_for('watchlist', sort='az') }}" class="chip {% if sort == 'az' %}active{% endif %}">
+    A → Z
   </a>
 
-  <a href="{{ url_for('watchlist', sort='za') }}"
-     class="chip {% if sort == 'za' %}active{% endif %}">
-     Z → A
+  <a href="{{ url_for('watchlist', sort='za') }}" class="chip {% if sort == 'za' %}active{% endif %}">
+    Z → A
   </a>
 
-  <a href="{{ url_for('watchlist', sort='rating') }}"
-     class="chip {% if sort == 'rating' %}active{% endif %}">
-     Rating
+  <a href="{{ url_for('watchlist', sort='rating') }}" class="chip {% if sort == 'rating' %}active{% endif %}">
+    Rating
   </a>
 </div>
 
@@ -70,25 +66,44 @@
 
   {% for show in shows %}
   <div class="card watchlist-card {% if show.priority %}priority-card{% endif %}"
-       data-priority="{{ 'true' if show.priority else 'false' }}">
+    data-priority="{{ 'true' if show.priority else 'false' }}">
 
+    <!-- Top Action Bar -->
     <!-- Top Action Bar -->
     <div class="card-top-actions">
 
-      <!-- Priority Pin -->
-      <form action="/watchlist/priority" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+      <div class="card-left-actions">
 
-        <button class="action-btn btn-priority-pin {% if show.priority %}active{% endif %}" type="submit">
-          <svg class="pin-icon" viewBox="0 0 24 24">
-            <path d="M9 4h6v2l-1.5 1.5v4.2l3.2 3.2V17H13v5h-2v-5H7.3v-2.1l3.2-3.2V7.5L9 6V4Z"></path>
-          </svg>
-        </button>
-      </form>
+        <!-- Priority Pin -->
+        <form action="{{ url_for('toggle_watchlist_priority') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+          <button class="action-btn btn-priority-pin {% if show.priority %}active{% endif %}" type="submit"
+            title="Toggle priority" aria-label="Toggle priority">
+            <svg class="pin-icon" viewBox="0 0 24 24">
+              <path d="M9 4h6v2l-1.5 1.5v4.2l3.2 3.2V17H13v5h-2v-5H7.3v-2.1l3.2-3.2V7.5L9 6V4Z"></path>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Favourite Star -->
+        <form action="{{ url_for('toggle_favourite') }}" method="POST" class="favourite-toggle-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
+
+          <button class="action-btn favourite-action-btn {% if show.tmdb_id in favourite_ids %}is-favourite{% endif %}"
+            type="submit"
+            title="{% if show.tmdb_id in favourite_ids %}Remove from favourites{% else %}Add to favourites{% endif %}"
+            aria-label="{% if show.tmdb_id in favourite_ids %}Remove from favourites{% else %}Add to favourites{% endif %}">
+            <i class="{% if show.tmdb_id in favourite_ids %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+          </button>
+        </form>
+
+      </div>
 
       <!-- Remove X -->
-      <form action="/watchlist/remove" method="POST">
+      <form action="{{ url_for('remove_from_watchlist') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="tmdb_id" value="{{ show.tmdb_id }}">
 
@@ -98,8 +113,7 @@
     </div>
 
     <a class="series-card-link" href="/series/{{ show.tmdb_id }}">
-      <div class="poster"
-           style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
+      <div class="poster" style="background-image: url('https://image.tmdb.org/t/p/w300{{ show.poster_path }}');">
       </div>
     </a>
 
@@ -140,7 +154,7 @@
   <div class="section-title">Your watchlist is empty</div>
 
   <p class="profile-muted-text">
-    Add shows from the 
+    Add shows from the
     <a href="{{ url_for('dashboard') }}" class="btn-ghost" style="padding: 4px 10px; font-size: 0.9rem;">
       Discover page
     </a>
