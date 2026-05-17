@@ -20,6 +20,7 @@
   <input type="hidden" id="global-csrf-token" value="{{ csrf_token() }}">
 
   <div class="shell">
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     {% include "partials/sidebar.html" %}
 
@@ -46,7 +47,7 @@
     function openSidebar() {
       if (isMobile()) {
         sidebar.classList.add('mobile-open');
-        overlay.classList.add('visible');
+        overlay?.classList.add('visible');
       } else {
         sidebar.classList.remove('collapsed');
       }
@@ -57,7 +58,7 @@
     function closeSidebar() {
       if (isMobile()) {
         sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('visible');
+        overlay?.classList.remove('visible');
       } else {
         sidebar.classList.add('collapsed');
       }
@@ -72,8 +73,8 @@
       isOpen ? closeSidebar() : openSidebar();
     }
 
-    toggleBtn.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', closeSidebar);
+    toggleBtn?.addEventListener('click', toggleSidebar);
+    overlay?.addEventListener('click', closeSidebar);
 
     const saved = localStorage.getItem('sidebarOpen');
     if (isMobile()) {
