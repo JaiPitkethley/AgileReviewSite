@@ -388,7 +388,8 @@ a {
   border-radius: var(--radius-md);
   padding: 8px 14px;
   flex: 1;
-  max-width: 400px;
+  width: 100%;
+  max-width: none;
   transition: border-color 0.15s;
 }
 
@@ -414,6 +415,101 @@ a {
   color: var(--text3);
   font-size: 13px;
   flex-shrink: 0;
+}
+
+.topbar-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text3);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.topbar-search-clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.topbar-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-right: 32px;
+}
+
+.topbar-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  z-index: 20;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.topbar-search-dropdown.hidden {
+  display: none;
+}
+
+.topbar-search-dropdown .card-grid {
+  gap: 10px;
+}
+
+.topbar-search-dropdown .search-empty {
+  margin: 0;
+  color: var(--text3);
+}
+
+.topbar-search-header {
+  margin-bottom: 12px;
+}
+
+.topbar-search-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 12px;
+}
+
+.pagination-btn {
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination-label {
+  color: var(--text2);
+  font-size: 12px;
 }
 
 .topbar-right {
@@ -657,6 +753,31 @@ a {
   text-transform: uppercase;
 }
 
+/* Extra spacing for the Trending section header */
+.section-header.trending-header {
+  padding-top: 12px;
+}
+
+/* Simple divider between sections */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  margin: 18px 0;
+  border-radius: 2px;
+}
+
+/* Center the rating and star elements for limited-fit grids */
+.card-grid.limited-fit .card-meta {
+  justify-content: center;
+  gap: 8px;
+}
+.card-grid.limited-fit .card-meta .rating-pill,
+.card-grid.limited-fit .card-meta .stars {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .see-all {
   font-size: 12px;
   color: var(--accent);
@@ -813,6 +934,16 @@ a {
   gap: 14px;
 }
 
+/* Limit certain grids to at most 6 columns and keep them centered */
+.card-grid.limited-fit {
+  width: 100%;
+  /* Allow the grid to auto-fit as many columns as can physically fit,
+     but cap the maximum visible columns to 9 to avoid overly long rows. */
+  max-width: calc(9 * 138px + 8 * 14px); /* 9 cards + gaps */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .card {
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -891,7 +1022,7 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .card-sub {
@@ -899,10 +1030,50 @@ a {
   color: var(--text2);
 }
 
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.rating-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(127, 119, 221, 0.12);
+  color: var(--accent-hi);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.card .add-watchlist-btn {
+  margin: 10px 11px 12px;
+}
+
+.continue-item {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ci-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.ci-meta .rating-pill {
+  padding: 2px 8px;
+}
+
 .stars {
   color: var(--yellow);
   font-size: 10px;
-  margin-top: 3px;
+  margin-top: 0;
 }
 
 .mt-4 {
@@ -1173,9 +1344,9 @@ select,
   border: 1px solid var(--border2);
   border-radius: var(--radius-md);
   padding: 8px 14px;
-  flex: 0 1 400px;
-  width: 400px;
-  max-width: 400px;
+  flex: 1;
+  width: 100%;
+  max-width: none;
   height: 42px;
   max-height: 42px;
 }
