@@ -3,7 +3,7 @@ from collections import Counter, defaultdict
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, redirect, render_template, request, session, url_for, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from flask_sqlalchemy import SQLAlchemy
@@ -73,6 +73,17 @@ class UserSeries(db.Model):
         db.UniqueConstraint("user_id", "tmdb_id", name="uq_user_tmdb"),
     )
 
+review_likes = db.Table(
+    "review_likes",
+    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+    db.Column("review_id", db.Integer, db.ForeignKey("episode_reviews.id"), primary_key=True),
+)
+
+comment_likes = db.Table(
+    "comment_likes",
+    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+    db.Column("comment_id", db.Integer, db.ForeignKey("comments.id"), primary_key=True),
+)
 
 class EpisodeReview(db.Model):
     __tablename__ = "episode_reviews"
@@ -102,6 +113,43 @@ class EpisodeReview(db.Model):
             name="uq_user_episode_review"
         ),
     )
+
+    comments = db.relationship("Comment", backref="review", lazy="dynamic")
+
+    liked_by = db.relationship(
+        "User",
+        secondary=review_likes,
+        backref=db.backref("liked_reviews", lazy="dynamic"),
+        lazy="dynamic",
+    )
+
+    @property
+    def like_count(self):
+        return self.liked_by.count()
+
+
+class Comment(db.Model):
+    __tablename__ = "comments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    review_id = db.Column(db.Integer, db.ForeignKey("episode_reviews.id"), nullable=False)
+
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    user = db.relationship("User", backref="comments", lazy=True)
+
+    liked_by = db.relationship(
+        "User",
+        secondary=comment_likes,
+        backref=db.backref("liked_comments", lazy="dynamic"),
+        lazy="dynamic",
+    )
+
+    @property
+    def like_count(self):
+        return self.liked_by.count()
 
 
 class Favourite(db.Model):
@@ -208,9 +256,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = User.query.with_entities(
-            User.id, User.username, User.email
-        ).filter_by(id=user_id).first()
+        g.user = User.query.get(user_id)
 
 
 @app.route("/")
@@ -564,10 +610,14 @@ def toggle_favourite():
 @app.route("/community")
 @login_required
 def community():
-    friend_ids = db.session.query(Friendship.friend_id).filter_by(
-        user_id=g.user.id
-    ).subquery()
+    # Get IDs of all friends
+    friend_ids = (
+        db.session.query(Friendship.friend_id)
+        .filter_by(user_id=g.user.id)
+        .subquery()
+    )
 
+    # Get reviews + user info
     friend_reviews = (
         db.session.query(EpisodeReview, User)
         .join(User, EpisodeReview.user_id == User.id)
@@ -582,11 +632,137 @@ def community():
             series = get_show_details(review.series_id)
             poster_paths[review.series_id] = series.get("poster_path")
 
+    review_scores = {
+        review.id: review.like_count
+        for review, _ in friend_reviews
+    }
+
+    user_likes = {
+        review.id: (review.liked_by.filter_by(id=g.user.id).count() > 0)
+        for review, _ in friend_reviews
+    }
+
+    comment_counts = {
+        review.id: review.comments.count()
+        for review, _ in friend_reviews
+    }
+
     return render_template(
         "community.html",
         user=g.user,
         friend_reviews=friend_reviews,
-        poster_paths=poster_paths
+        poster_paths=poster_paths,
+        review_scores=review_scores,
+        user_likes=user_likes,
+        comment_counts=comment_counts,
+    )
+
+@app.route("/reviews/like/<int:review_id>", methods=["POST"])
+@login_required
+def like_review(review_id):
+    review = EpisodeReview.query.get_or_404(review_id)
+
+    # FIX: ensure we have a REAL User model instance
+    user = User.query.get(g.user.id)
+
+    if review.liked_by.filter_by(id=user.id).first():
+        review.liked_by.remove(user)
+        user_liked = False
+    else:
+        review.liked_by.append(user)
+        user_liked = True
+
+    db.session.commit()
+
+    return jsonify({
+        "likes": review.like_count,
+        "user_liked": user_liked
+    })
+
+@app.route("/comments/like/<int:comment_id>", methods=["POST"])
+@login_required
+def like_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    if comment.liked_by.filter_by(id=g.user.id).first():
+        comment.liked_by.remove(g.user)
+        db.session.commit()
+        return jsonify({"likes": comment.like_count, "user_liked": False})
+
+    comment.liked_by.append(g.user)
+    db.session.commit()
+    return jsonify({"likes": comment.like_count, "user_liked": True})
+
+
+@app.route("/comments/add/<int:review_id>", methods=["POST"])
+@login_required
+def add_comment(review_id):
+    review = EpisodeReview.query.get_or_404(review_id)
+    text = ""
+    if request.is_json:
+        data = request.get_json() or {}
+        text = (data.get("text") or "").strip()
+    else:
+        text = (request.form.get("text") or "").strip()
+
+    if not text:
+        if request.is_json:
+            return jsonify({"error": "Empty comment"}), 400
+        else:
+            flash("Comment cannot be empty.", "error")
+            return redirect(request.referrer or url_for("community"))
+
+    comment = Comment(user_id=g.user.id, review_id=review_id, text=text)
+    db.session.add(comment)
+    db.session.commit()
+
+    comments = review.comments.order_by(Comment.created_at.asc()).all()
+    user_comment_likes = {c.id: (c.liked_by.filter_by(id=g.user.id).count() > 0) for c in comments}
+
+    return render_template(
+        "partials/review_comments.html",
+        comments=comments,
+        user_comment_likes=user_comment_likes,
+        review_id=review_id,
+    )
+
+@app.route("/comments/delete/<int:comment_id>", methods=["POST"])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if comment.user_id != g.user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    review_id = comment.review_id
+    db.session.delete(comment)
+    db.session.commit()
+
+    review = EpisodeReview.query.get_or_404(review_id)
+    comments = review.comments.order_by(Comment.created_at.asc()).all()
+    user_comment_likes = {c.id: (c.liked_by.filter_by(id=g.user.id).count() > 0) for c in comments}
+
+    return render_template(
+        "partials/review_comments.html",
+        comments=comments,
+        user_comment_likes=user_comment_likes,
+        review_id=review_id,
+    )
+
+@app.route("/reviews/comments/<int:review_id>")
+@login_required
+def review_comments(review_id):
+    review = EpisodeReview.query.get_or_404(review_id)
+    comments = review.comments.order_by(Comment.created_at.asc()).all()
+
+    user_comment_likes = {
+        c.id: (c.liked_by.filter_by(id=g.user.id).count() > 0) for c in comments
+    }
+
+    return render_template(
+        "partials/review_comments.html",
+        comments=comments,
+        user_comment_likes=user_comment_likes,
+        review_id=review_id,
     )
 
 

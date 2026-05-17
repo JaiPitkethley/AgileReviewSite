@@ -1,0 +1,38 @@
+{% for c in comments %}
+  <div class="comment-item">
+    <div class="comment-header">
+      <div class="comment-avatar">{{ c.user.username[:2] | upper }}</div>
+      <div>
+        <div class="comment-user">{{ c.user.username }}</div>
+        <div class="comment-meta">{{ c.created_at.strftime('%b %d, %Y') }}</div>
+      </div>
+      {% if c.user_id == g.user.id %}
+        <button class="comment-delete-btn" onclick="deleteComment(event, {{ c.id }}, {{ review_id }})">✕</button>
+      {% endif %}
+    </div>
+
+    <div class="comment-text">{{ c.text }}</div>
+
+    <div class="comment-footer">
+      <div class="comment-score-group">
+        <span id="comment-likes-{{ c.id }}">{{ c.like_count }}</span>
+        <button class="comment-like-btn {% if user_comment_likes.get(c.id) %}liked{% endif %}"
+                onclick="likeComment(event, {{ c.id }})">
+          ▲
+        </button>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="profile-muted-text">No comments yet.</p>
+{% endfor %}
+
+<div class="comment-write">
+  <form method="post" action="{{ url_for('add_comment', review_id=review_id) }}" onsubmit="submitComment(event, {{ review_id }})">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <textarea id="comment-text-{{ review_id }}" name="text" rows="3" placeholder="Write a comment..." oninput="toggleAddCommentButton(this, {{ review_id }})" required></textarea>
+    <div style="margin-top:8px;text-align:right;">
+      <button id="comment-submit-{{ review_id }}" type="submit" class="btn-primary" style="display:none;" disabled>Add comment</button>
+    </div>
+  </form>
+</div>
