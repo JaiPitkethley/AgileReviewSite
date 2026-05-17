@@ -19,8 +19,6 @@
       <a href="{{ url_for('settings') }}" class="btn-ghost profile-small-btn">
         Edit profile
       </a>
-
-      <button class="profile-circle-btn" type="button">•••</button>
     </div>
 
     <p>
@@ -51,22 +49,6 @@
       <div class="hero-stat-l">Episodes</div>
     </div>
   </div>
-</div>
-
-
-<!-- Profile Tabs -->
-<div class="filter-row profile-filter-row">
-  <span class="filter-label">Profile</span>
-
-  <div class="chip active">Overview</div>
-  <div class="chip">Activity</div>
-  <div class="chip">Series</div>
-  <div class="chip">Diary</div>
-  <div class="chip">Reviews</div>
-  <div class="chip">Watchlist</div>
-  <div class="chip">Lists</div>
-  <div class="chip">Likes</div>
-  <div class="chip">Network</div>
 </div>
 
 
@@ -146,86 +128,44 @@
         {% endfor %}
 
         {% for i in range(4 - favourite_items|length) %}
-        <div class="profile-empty-favourite">
+        <a href="{{ url_for('dashboard') }}" class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
-        </div>
+        </a>
         {% endfor %}
 
         {% else %}
 
-        <div class="profile-empty-favourite">
+        <a href="{{ url_for('dashboard') }}" class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
-        </div>
+        </a>
 
-        <div class="profile-empty-favourite">
+        <a href="{{ url_for('dashboard') }}" class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
-        </div>
+        </a>
 
-        <div class="profile-empty-favourite">
+        <a href="{{ url_for('dashboard') }}" class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
-        </div>
+        </a>
 
-        <div class="profile-empty-favourite">
+        <a href="{{ url_for('dashboard') }}" class="profile-empty-favourite">
           <span>+</span>
           <p>Add favourite</p>
-        </div>
+        </a>
 
         {% endif %}
 
       </div>
     </section>
 
-    <!-- Recent Activity -->
-    <section class="profile-block">
-      <div class="section-header">
-        <span class="section-title">Recent activity</span>
-        <span class="see-all">View all</span>
-      </div>
 
-      <div class="continue-list">
-        <div class="continue-item">
-          <div class="ci-poster p1">G</div>
-
-          <div class="ci-body">
-            <div class="ci-title">Started watching Ghosts</div>
-            <div class="ci-sub">Season 1 · Episode 1</div>
-
-            <div class="ci-bar">
-              <div class="ci-track">
-                <div class="ci-fill" style="width: 20%"></div>
-              </div>
-              <span class="ci-pct">20%</span>
-            </div>
-          </div>
-
-          <span class="badge badge-watching">Watching</span>
-        </div>
-
-        <div class="continue-item">
-          <div class="ci-poster p3">R</div>
-
-          <div class="ci-body">
-            <div class="ci-title">Reviewed a recent episode</div>
-            <div class="stars">★★★★☆</div>
-            <div class="ci-sub">Good pacing and funny character moments.</div>
-          </div>
-
-          <span class="badge badge-finished">Reviewed</span>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- Recent Reviews -->
     <!-- Recent Reviews -->
     <section class="profile-block">
       <div class="section-header">
         <span class="section-title">Recent reviews</span>
-        <span class="see-all">View all</span>
       </div>
 
       <div class="profile-review-list">
@@ -293,18 +233,6 @@
   </div>
 
 
-  <!-- Side Column -->
-  <aside class="profile-side">
-
-    <section class="profile-side-card">
-      <div class="section-header">
-        <span class="section-title">Activity</span>
-      </div>
-
-      <p class="profile-muted-text">No new notifications.</p>
-    </section>
-
-
     <section class="profile-side-card">
       <div class="section-header">
         <span class="section-title">Stats</span>
@@ -330,23 +258,6 @@
         <strong>{{ watchlist_count }}</strong>
       </div>
     </section>
-
-
-    <section class="profile-side-card profile-upgrade-soft">
-      <div class="section-header">
-        <span class="section-title">Profile tools</span>
-      </div>
-
-      <p>
-        Add favourites, manage your watchlist, write reviews, and customise your profile.
-      </p>
-
-      <a href="{{ url_for('settings') }}" class="btn-primary profile-side-button">
-        Customise profile
-      </a>
-    </section>
-
-  </aside>
 
 </div>
 
